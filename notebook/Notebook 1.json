@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "77262a26-b6e0-45fc-b954-94346fb5e9e6"
+				"spark.autotune.trackingId": "46ef0d1c-f7cf-485a-a214-47dc18f27974"
 			}
 		},
 		"metadata": {
@@ -58,7 +58,7 @@
 					"sales_data = spark.read.load(\"abfss://root@stcgcasestudy.dfs.core.windows.net/sales_rawfile/sales_data_sample.csv\",\r\n",
 					"format='csv',header=True)\r\n",
 					"\r\n",
-					"\r\n",
+					"#first 10 rows\r\n",
 					"display(sales_data.limit(10))"
 				],
 				"execution_count": null
