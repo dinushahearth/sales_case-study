@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "46ef0d1c-f7cf-485a-a214-47dc18f27974"
+				"spark.autotune.trackingId": "f5ad650f-0fba-402e-a7a2-b19c1fe6d838"
 			}
 		},
 		"metadata": {
@@ -54,7 +54,7 @@
 					"collapsed": false
 				},
 				"source": [
-					"#loading the raw sales data\r\n",
+					"#loading the raw sales data from data lake gen 2\r\n",
 					"sales_data = spark.read.load(\"abfss://root@stcgcasestudy.dfs.core.windows.net/sales_rawfile/sales_data_sample.csv\",\r\n",
 					"format='csv',header=True)\r\n",
 					"\r\n",
