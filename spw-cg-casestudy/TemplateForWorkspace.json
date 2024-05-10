@@ -22,24 +22,6 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('workspaceName'), '/sales_cg')]",
-			"type": "Microsoft.Synapse/workspaces/sqlPools",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/salespycg')]",
-			"type": "Microsoft.Synapse/workspaces/bigDataPools",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('workspaceName'), '/spw-cg-casestudy-WorkspaceDefaultSqlServer')]",
 			"type": "Microsoft.Synapse/workspaces/linkedServices",
 			"apiVersion": "2019-06-01-preview",
@@ -152,7 +134,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "d6db0590-9d3f-426f-b429-7144c7a7e6e8"
+						"spark.autotune.trackingId": "55b79750-3bf7-4662-a176-35592ed7eb62"
 					}
 				},
 				"metadata": {
@@ -186,15 +168,40 @@
 					{
 						"cell_type": "code",
 						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"#importing necessary libraries\r\n",
+							"import pandas as pd"
+						],
+						"outputs": [],
+						"execution_count": 115
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
 							"collapsed": false
 						},
 						"source": [
-							"#loading the raw sales data\r\n",
-							"sales_data = spark.read.load(\"abfss://root@stcgcasestudy.dfs.core.windows.net/sales_rawfile/sales_data_sample.csv\",\r\n",
+							"path = 'abfss://root@stcgcasestudy.dfs.core.windows.net'\r\n",
+							"\r\n",
+							"#loading the raw sales data from data lake gen 2\r\n",
+							"sales_data = spark.read.load(f\"{path}/sales_rawfile/sales_data_sample.csv\",\r\n",
 							"format='csv',header=True)\r\n",
 							"\r\n",
+							"#convert to pandas dataframe\r\n",
+							"sales_data = sales_data.toPandas()\r\n",
 							"\r\n",
-							"display(sales_data.limit(10))"
+							"#first 10 rows\r\n",
+							"sales_data.head(10)"
 						],
 						"outputs": [],
 						"execution_count": null
@@ -213,7 +220,114 @@
 							}
 						},
 						"source": [
-							""
+							"#removing unnecessary columns\r\n",
+							"un_columns = ['ORDERLINENUMBER','QTR_ID','MONTH_ID','YEAR_ID']\r\n",
+							"\r\n",
+							"sales_data.drop(un_columns,axis=1,inplace=True)"
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"#converting data types of the necessary columns\r\n",
+							"sales_data['ORDERDATE'] = pd.to_datetime(sales_data['ORDERDATE'])\r\n",
+							"\r\n",
+							"num_columns = ['ORDERNUMBER','QUANTITYORDERED','PRICEEACH','SALES']\r\n",
+							"\r\n",
+							"for col in num_columns:\r\n",
+							"    try:\r\n",
+							"        sales_data[col] = sales_data[col].astype(int)\r\n",
+							"    except ValueError:\r\n",
+							"        sales_data[col] = sales_data[col].astype(float)\r\n",
+							"\r\n",
+							"\r\n",
+							"sales_data.info()"
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"sales_data['SALES']"
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"#OrderDate dimention table\r\n",
+							"dimOrderDate = sales_data[['ORDERNUMBER','ORDERDATE']].drop_duplicates().reset_index(drop=True)\r\n",
+							"\r\n",
+							"#Products dimention table\r\n",
+							"dimProducts = sales_data[['PRODUCTCODE','MSRP','PRODUCTLINE']].drop_duplicates().reset_index(drop=True)\r\n",
+							"\r\n",
+							"#Customers dimention table\r\n",
+							"dimCustomers = sales_data[['CUSTOMERNAME', 'PHONE',\r\n",
+							"       'ADDRESSLINE1', 'ADDRESSLINE2', 'CITY', 'STATE', 'POSTALCODE',\r\n",
+							"       'COUNTRY', 'TERRITORY', 'CONTACTLASTNAME', 'CONTACTFIRSTNAME']].drop_duplicates().reset_index(drop=True)\r\n",
+							"\r\n",
+							"#SalesDeals dimention table\r\n",
+							"dimSalesDeals = sales_data[['SALES','DEALSIZE']].drop_duplicates().reset_index(drop=True) #transitive dependency\r\n",
+							"\r\n",
+							"\r\n",
+							"#Orders fact table\r\n",
+							"factOrders = sales_data[['ORDERNUMBER','PRODUCTCODE','QUANTITYORDERED', 'PRICEEACH', 'SALES','CUSTOMERNAME']]"
+						],
+						"outputs": [],
+						"execution_count": null
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"factOrders.to_csv(f\"{path}/Sales_Transformed/factOrders.csv\")"
 						],
 						"outputs": [],
 						"execution_count": null
