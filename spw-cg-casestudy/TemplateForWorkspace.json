@@ -134,7 +134,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "55b79750-3bf7-4662-a176-35592ed7eb62"
+						"spark.autotune.trackingId": "95883829-dc30-41bd-95ac-37a769aa77dd"
 					}
 				},
 				"metadata": {
@@ -183,7 +183,7 @@
 							"import pandas as pd"
 						],
 						"outputs": [],
-						"execution_count": 115
+						"execution_count": 180
 					},
 					{
 						"cell_type": "code",
@@ -204,7 +204,7 @@
 							"sales_data.head(10)"
 						],
 						"outputs": [],
-						"execution_count": null
+						"execution_count": 181
 					},
 					{
 						"cell_type": "code",
@@ -226,7 +226,7 @@
 							"sales_data.drop(un_columns,axis=1,inplace=True)"
 						],
 						"outputs": [],
-						"execution_count": null
+						"execution_count": 182
 					},
 					{
 						"cell_type": "code",
@@ -257,7 +257,7 @@
 							"sales_data.info()"
 						],
 						"outputs": [],
-						"execution_count": null
+						"execution_count": 183
 					},
 					{
 						"cell_type": "code",
@@ -273,10 +273,20 @@
 							}
 						},
 						"source": [
-							"sales_data['SALES']"
+							"#corrected the values of SALES column by;\r\n",
+							"sales_data['SALES'] =sales_data['QUANTITYORDERED'] * sales_data['PRICEEACH']\r\n",
+							"\r\n",
+							"'''\r\n",
+							"0 - 3000 = Small \r\n",
+							"3000 - 6000 = Medium\r\n",
+							"6000 <=  = Large\r\n",
+							"'''\r\n",
+							"\r\n",
+							"sales_data['DEALSIZE'] = sales_data['SALES'].apply(lambda x: 'Small' if x >= 0 and x < 3000 \r\n",
+							"else ('Medium' if x >= 3000 and x < 6000 else 'Large'))"
 						],
 						"outputs": [],
-						"execution_count": null
+						"execution_count": 184
 					},
 					{
 						"cell_type": "code",
@@ -306,12 +316,11 @@
 							"#SalesDeals dimention table\r\n",
 							"dimSalesDeals = sales_data[['SALES','DEALSIZE']].drop_duplicates().reset_index(drop=True) #transitive dependency\r\n",
 							"\r\n",
-							"\r\n",
 							"#Orders fact table\r\n",
 							"factOrders = sales_data[['ORDERNUMBER','PRODUCTCODE','QUANTITYORDERED', 'PRICEEACH', 'SALES','CUSTOMERNAME']]"
 						],
 						"outputs": [],
-						"execution_count": null
+						"execution_count": 185
 					},
 					{
 						"cell_type": "code",
@@ -327,10 +336,13 @@
 							}
 						},
 						"source": [
-							"factOrders.to_csv(f\"{path}/Sales_Transformed/factOrders.csv\")"
+							"#loading transformed data into the data lake\r\n",
+							"for file, filename in [(dimOrderDate, \"dimOrderDate\"), (dimProducts, \"dimProducts\"), (dimCustomers, \"dimCustomers\"), (dimSalesDeals, \"dimSalesDeals\"), (factOrders, \"factOrders\")]:\r\n",
+							"    file.to_csv(f\"{path}/Sales_Transformed/{filename}.csv\")\r\n",
+							""
 						],
 						"outputs": [],
-						"execution_count": null
+						"execution_count": 186
 					}
 				]
 			},
