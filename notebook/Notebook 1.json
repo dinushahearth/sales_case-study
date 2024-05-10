@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "3f6732f1-bb63-448e-a1c0-f9246386feea"
+				"spark.autotune.trackingId": "744d3ea1-8518-4ea0-b4a0-a42b2cbaf81b"
 			}
 		},
 		"metadata": {
@@ -65,7 +65,7 @@
 					"#importing necessary libraries\r\n",
 					"import pandas as pd"
 				],
-				"execution_count": 161
+				"execution_count": 180
 			},
 			{
 				"cell_type": "code",
@@ -85,7 +85,7 @@
 					"#first 10 rows\r\n",
 					"sales_data.head(10)"
 				],
-				"execution_count": 162
+				"execution_count": 181
 			},
 			{
 				"cell_type": "code",
@@ -106,7 +106,7 @@
 					"\r\n",
 					"sales_data.drop(un_columns,axis=1,inplace=True)"
 				],
-				"execution_count": 163
+				"execution_count": 182
 			},
 			{
 				"cell_type": "code",
@@ -136,7 +136,7 @@
 					"\r\n",
 					"sales_data.info()"
 				],
-				"execution_count": 164
+				"execution_count": 183
 			},
 			{
 				"cell_type": "code",
@@ -164,7 +164,7 @@
 					"sales_data['DEALSIZE'] = sales_data['SALES'].apply(lambda x: 'Small' if x >= 0 and x < 3000 \r\n",
 					"else ('Medium' if x >= 3000 and x < 6000 else 'Large'))"
 				],
-				"execution_count": 165
+				"execution_count": 184
 			},
 			{
 				"cell_type": "code",
@@ -197,7 +197,7 @@
 					"#Orders fact table\r\n",
 					"factOrders = sales_data[['ORDERNUMBER','PRODUCTCODE','QUANTITYORDERED', 'PRICEEACH', 'SALES','CUSTOMERNAME']]"
 				],
-				"execution_count": 166
+				"execution_count": 185
 			},
 			{
 				"cell_type": "code",
@@ -213,9 +213,12 @@
 					}
 				},
 				"source": [
-					"factOrders.to_csv(f\"{path}/Sales_Transformed/factOrders.csv\")"
+					"#loading transformed data into the data lake\r\n",
+					"for file, filename in [(dimOrderDate, \"dimOrderDate\"), (dimProducts, \"dimProducts\"), (dimCustomers, \"dimCustomers\"), (dimSalesDeals, \"dimSalesDeals\"), (factOrders, \"factOrders\")]:\r\n",
+					"    file.to_csv(f\"{path}/Sales_Transformed/{filename}.csv\")\r\n",
+					""
 				],
-				"execution_count": 167
+				"execution_count": 186
 			}
 		]
 	}
