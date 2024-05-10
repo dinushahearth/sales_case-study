@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "f5ad650f-0fba-402e-a7a2-b19c1fe6d838"
+				"spark.autotune.trackingId": "db522d72-e3f0-4fc1-8130-bb8a98f1855e"
 			}
 		},
 		"metadata": {
@@ -51,6 +51,25 @@
 			{
 				"cell_type": "code",
 				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#importing necessary libraries\r\n",
+					"import pandas as pd"
+				],
+				"execution_count": 75
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
 					"collapsed": false
 				},
 				"source": [
@@ -58,10 +77,13 @@
 					"sales_data = spark.read.load(\"abfss://root@stcgcasestudy.dfs.core.windows.net/sales_rawfile/sales_data_sample.csv\",\r\n",
 					"format='csv',header=True)\r\n",
 					"\r\n",
+					"#convert to pandas dataframe\r\n",
+					"sales_data = sales_data.toPandas()\r\n",
+					"\r\n",
 					"#first 10 rows\r\n",
-					"display(sales_data.limit(10))"
+					"sales_data.head(10)"
 				],
-				"execution_count": null
+				"execution_count": 76
 			},
 			{
 				"cell_type": "code",
@@ -77,7 +99,92 @@
 					}
 				},
 				"source": [
-					""
+					"#removing unnecessary columns\r\n",
+					"un_columns = ['ORDERLINENUMBER','QTR_ID','MONTH_ID','YEAR_ID']\r\n",
+					"\r\n",
+					"sales_data.drop(un_columns,axis=1,inplace=True)"
+				],
+				"execution_count": 77
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#converting data types of the necessary columns\r\n",
+					"sales_data['ORDERDATE'] = pd.to_datetime(sales_data['ORDERDATE'])\r\n",
+					"\r\n",
+					"num_columns = ['ORDERNUMBER','QUANTITYORDERED','PRICEEACH','SALES']\r\n",
+					"\r\n",
+					"for col in num_columns:\r\n",
+					"    try:\r\n",
+					"        sales_data[col] = sales_data[col].astype(int)\r\n",
+					"    except ValueError:\r\n",
+					"        sales_data[col] = sales_data[col].astype(float)\r\n",
+					"\r\n",
+					"\r\n",
+					"sales_data.info()"
+				],
+				"execution_count": 78
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"#OrderDate dimention table\r\n",
+					"dimOrderDate = sales_data[['ORDERNUMBER','ORDERDATE']].drop_duplicates().reset_index(drop=True)\r\n",
+					"\r\n",
+					"#Products dimention table\r\n",
+					"dimProducts = sales_data[['PRODUCTCODE','MSRP','PRODUCTLINE']].drop_duplicates().reset_index(drop=True)\r\n",
+					"\r\n",
+					"#Customers dimention table\r\n",
+					"dimCustomers = sales_data[['CUSTOMERNAME', 'PHONE',\r\n",
+					"       'ADDRESSLINE1', 'ADDRESSLINE2', 'CITY', 'STATE', 'POSTALCODE',\r\n",
+					"       'COUNTRY', 'TERRITORY', 'CONTACTLASTNAME', 'CONTACTFIRSTNAME']].drop_duplicates().reset_index(drop=True)\r\n",
+					"\r\n",
+					"#SalesDeals dimention table\r\n",
+					"dimSalesDeals = sales_data[['SALES','DEALSIZE']].drop_duplicates().reset_index(drop=True) #transitive dependency\r\n",
+					"\r\n",
+					"\r\n",
+					"#Orders fact table\r\n",
+					"factOrders = sales_data[['ORDERNUMBER','PRODUCTCODE','QUANTITYORDERED', 'PRICEEACH', 'SALES','CUSTOMERNAME']]"
+				],
+				"execution_count": 79
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"factOrders.write()"
 				],
 				"execution_count": null
 			}
