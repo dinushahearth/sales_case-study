@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "db522d72-e3f0-4fc1-8130-bb8a98f1855e"
+				"spark.autotune.trackingId": "56a58ced-184f-4e7c-90e3-0d0ab8497365"
 			}
 		},
 		"metadata": {
@@ -65,7 +65,7 @@
 					"#importing necessary libraries\r\n",
 					"import pandas as pd"
 				],
-				"execution_count": 75
+				"execution_count": 115
 			},
 			{
 				"cell_type": "code",
@@ -73,8 +73,10 @@
 					"collapsed": false
 				},
 				"source": [
+					"path = 'abfss://root@stcgcasestudy.dfs.core.windows.net'\r\n",
+					"\r\n",
 					"#loading the raw sales data from data lake gen 2\r\n",
-					"sales_data = spark.read.load(\"abfss://root@stcgcasestudy.dfs.core.windows.net/sales_rawfile/sales_data_sample.csv\",\r\n",
+					"sales_data = spark.read.load(f\"{path}/sales_rawfile/sales_data_sample.csv\",\r\n",
 					"format='csv',header=True)\r\n",
 					"\r\n",
 					"#convert to pandas dataframe\r\n",
@@ -83,7 +85,7 @@
 					"#first 10 rows\r\n",
 					"sales_data.head(10)"
 				],
-				"execution_count": 76
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -104,7 +106,7 @@
 					"\r\n",
 					"sales_data.drop(un_columns,axis=1,inplace=True)"
 				],
-				"execution_count": 77
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -134,7 +136,25 @@
 					"\r\n",
 					"sales_data.info()"
 				],
-				"execution_count": 78
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"sales_data['SALES']"
+				],
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -168,7 +188,7 @@
 					"#Orders fact table\r\n",
 					"factOrders = sales_data[['ORDERNUMBER','PRODUCTCODE','QUANTITYORDERED', 'PRICEEACH', 'SALES','CUSTOMERNAME']]"
 				],
-				"execution_count": 79
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -184,7 +204,7 @@
 					}
 				},
 				"source": [
-					"factOrders.write()"
+					"factOrders.to_csv(f\"{path}/Sales_Transformed/factOrders.csv\")"
 				],
 				"execution_count": null
 			}
