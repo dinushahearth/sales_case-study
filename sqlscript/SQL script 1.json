@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 1",
+	"properties": {
+		"content": {
+			"query": "\nCREATE TABLE #StageCustomers(\n    [Customer_Name] VARCHAR(100) NOT NULL,\n    [Phone] VARCHAR(50) NULL,\n\t[Address_Line1] VARCHAR(100) NULL,\n\t[Address_Line2] VARCHAR(100) NULL,\n\t[City] VARCHAR(50) NULL,\n\t[State] VARCHAR(50) NULL,\n\t[Postal_Code] VARCHAR(50) NULL,\n\t[Country] VARCHAR(50) NULL,\n\t[Territory] VARCHAR(50) NULL,\n\t[Contact_Lastname] VARCHAR(20) NULL,\n\t[Conact_Firstname] VARCHAR(20) NULL\n)\n\nSELECT *\nFROM #StageCustomers\n\n\nCOPY INTO #Sales.dimCustomers \nfrom 'https://stcgcasestudy.dfs.core.windows.net/root/Sales_Transformed/dimCustomers.csv'\nwith(\n    FILE_TYPE = 'CSV',\n    IDENTITY_INSERT= 'OFF',\n    FIRSTROW = 2\n)\n\n\nSELECT *\nFROM Sales.dimCustomers\n\n\n\nINSERT INTO #Sales.dimCustomers ([Customer_Name],\n    [Phone] ,\n\t[Address_Line1] ,\n\t[Address_Line2] ,\n\t[City] ,\n\t[State],\n\t[Postal_Code] ,\n\t[Country] ,\n\t[Territory] ,\n\t[Contact_Lastname] ,\n\t[Conact_Firstname] )\nfrom 'https://stcgcasestudy.dfs.core.windows.net/root/Sales_Transformed/dimCustomers.csv'\nwith(\n    FILE_TYPE = 'CSV',\n    IDENTITY_INSERT= 'OFF',\n    FIRSTROW = 2\n)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCREATE MASTER KEY ENCRYPTION BY PASSWORD = 'Hera@123'\n\nCREATE DATABASE SCOPED CREDENTIAL SalesCRED\nWITH IDENTITY = 'Managed Identity'\n\nCREATE EXTERNAL DATA SOURCE SalesExSource\nWITH(\n    LOCATION = 'https://stcgcasestudy.dfs.core.windows.net/',\n    CREDENTIAL = SalesCRED\n)\n\nCREATE EXTERNAL FILE FORMAT SalesExfileF WITH(\n    FORMAT_TYPE = DELIMITEDTEXT,\n    FORMAT_OPTIONS(\n        FIRST_ROW = 1\n    )\n)\n\n\nCREATE EXTERNAL TABLE Sales.ExCustomers WITH(\n    LOCATION = 'root/Sales_ExternalFiles',\n    DATA_SOURCE = SalesExSource,\n    FILE_FORMAT = SalesExfileF\n)AS\nSELECT *\nFROM \nOPENROWSET(\n    BULK 'https://stcgcasestudy.dfs.core.windows.net/root/Sales_Transformed/dimCustomers.csv',\n    FORMAT = 'CSV',\n    PARSER_VERSION = '2.0'\n) AS ExternalCustomers \n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "sales_cg",
+				"poolName": "sales_cg"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
