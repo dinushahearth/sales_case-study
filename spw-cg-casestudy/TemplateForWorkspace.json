@@ -119,7 +119,27 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "\nCREATE TABLE #StageCustomers(\n    [Customer_Name] VARCHAR(100) NOT NULL,\n    [Phone] VARCHAR(50) NULL,\n\t[Address_Line1] VARCHAR(100) NULL,\n\t[Address_Line2] VARCHAR(100) NULL,\n\t[City] VARCHAR(50) NULL,\n\t[State] VARCHAR(50) NULL,\n\t[Postal_Code] VARCHAR(50) NULL,\n\t[Country] VARCHAR(50) NULL,\n\t[Territory] VARCHAR(50) NULL,\n\t[Contact_Lastname] VARCHAR(20) NULL,\n\t[Conact_Firstname] VARCHAR(20) NULL\n)\n\nSELECT *\nFROM #StageCustomers\n\n\nCOPY INTO #Sales.dimCustomers \nfrom 'https://stcgcasestudy.dfs.core.windows.net/root/Sales_Transformed/dimCustomers.csv'\nwith(\n    FILE_TYPE = 'CSV',\n    IDENTITY_INSERT= 'OFF',\n    FIRSTROW = 2\n)\n\n\nSELECT *\nFROM Sales.dimCustomers\n\n\n\nINSERT INTO #Sales.dimCustomers ([Customer_Name],\n    [Phone] ,\n\t[Address_Line1] ,\n\t[Address_Line2] ,\n\t[City] ,\n\t[State],\n\t[Postal_Code] ,\n\t[Country] ,\n\t[Territory] ,\n\t[Contact_Lastname] ,\n\t[Conact_Firstname] )\nfrom 'https://stcgcasestudy.dfs.core.windows.net/root/Sales_Transformed/dimCustomers.csv'\nwith(\n    FILE_TYPE = 'CSV',\n    IDENTITY_INSERT= 'OFF',\n    FIRSTROW = 2\n)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCREATE MASTER KEY ENCRYPTION BY PASSWORD = 'Hera@123'\n\nCREATE DATABASE SCOPED CREDENTIAL SalesCRED\nWITH IDENTITY = 'Managed Identity'\n\nCREATE EXTERNAL DATA SOURCE SalesExSource\nWITH(\n    LOCATION = 'abfss://root@stcgcasestudy.dfs.core.windows.net/',\n    CREDENTIAL = SalesCRED,\n    TYPE = HADOOP\n)\n\n\nCREATE EXTERNAL FILE FORMAT SalesExfileF WITH(\n    FORMAT_TYPE = DELIMITEDTEXT,\n    FORMAT_OPTIONS(\n        FIRST_ROW = 2\n    )\n)\n\nDROP EXTERNAL FILE FORMAT SalesExfileF \nDROP EXTERNAL DATA SOURCE SalesExSource\n\nCREATE EXTERNAL TABLE Sales.ExCustomers(\n    [Customer_Name] VARCHAR(100) NOT NULL,\n    [Phone] VARCHAR(50) NULL,\n\t[Address_Line1] VARCHAR(100) NULL,\n\t[Address_Line2] VARCHAR(100) NULL,\n\t[City] VARCHAR(50) NULL,\n\t[State] VARCHAR(50) NULL,\n\t[Postal_Code] VARCHAR(50) NULL,\n\t[Country] VARCHAR(50) NULL,\n\t[Territory] VARCHAR(50) NULL,\n\t[Contact_Lastname] VARCHAR(20) NULL,\n\t[Conact_Firstname] VARCHAR(20) NULL\n)\nWITH(\n    LOCATION = 'Sales_Transformed/dimCustomers.csv',\n    DATA_SOURCE = SalesExSource,\n    FILE_FORMAT = SalesExfileF\n)\n\n\n\n\n\n\n\n\n\n\n\n\n",
+					"query": "\nCREATE TABLE #StageCustomers(\n    [Customer_Name] VARCHAR(100) NOT NULL,\n    [Phone] VARCHAR(50) NULL,\n\t[Address_Line1] VARCHAR(100) NULL,\n\t[Address_Line2] VARCHAR(100) NULL,\n\t[City] VARCHAR(50) NULL,\n\t[State] VARCHAR(50) NULL,\n\t[Postal_Code] VARCHAR(50) NULL,\n\t[Country] VARCHAR(50) NULL,\n\t[Territory] VARCHAR(50) NULL,\n\t[Contact_Lastname] VARCHAR(20) NULL,\n\t[Conact_Firstname] VARCHAR(20) NULL\n)\n\nSELECT *\nFROM #StageCustomers\n\n\nCOPY INTO #Sales.dimCustomers \nfrom 'https://stcgcasestudy.dfs.core.windows.net/root/Sales_Transformed/dimCustomers.csv'\nwith(\n    FILE_TYPE = 'CSV',\n    IDENTITY_INSERT= 'OFF',\n    FIRSTROW = 2\n)\n\n\nSELECT *\nFROM Sales.dimCustomers\n\n\n\nINSERT INTO #Sales.dimCustomers ([Customer_Name],\n    [Phone] ,\n\t[Address_Line1] ,\n\t[Address_Line2] ,\n\t[City] ,\n\t[State],\n\t[Postal_Code] ,\n\t[Country] ,\n\t[Territory] ,\n\t[Contact_Lastname] ,\n\t[Conact_Firstname] )\nfrom 'https://stcgcasestudy.dfs.core.windows.net/root/Sales_Transformed/dimCustomers.csv'\nwith(\n    FILE_TYPE = 'CSV',\n    IDENTITY_INSERT= 'OFF',\n    FIRSTROW = 2\n)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCREATE MASTER KEY ENCRYPTION BY PASSWORD = 'Hera@123'\n\nCREATE DATABASE SCOPED CREDENTIAL SalesCRED\nWITH IDENTITY = 'Account Key',\nSECRET= '547NffpVoMyDj7N2xeoebprS3OcYZ+FNt8aSWOEfZCVd2K6JjilClnRmYKRLvtW2N0ZP6Zk1t2z5+AStsUTFAw=='\n\n\n\n\n\n\nCREATE EXTERNAL DATA SOURCE SalesExSource\nWITH(\n    LOCATION = 'abfss://root@stcgcasestudy.dfs.core.windows.net',\n    CREDENTIAL = SalesCRED,\n    TYPE = HADOOP\n)\n\n\nCREATE EXTERNAL FILE FORMAT SalesExfileF WITH(\n    FORMAT_TYPE = DELIMITEDTEXT,\n\t--DATA_COMPRESSION = 'org.apache.hadoop.io.compress.GzipCodec',\n    FORMAT_OPTIONS(\n\t\tENCODING = 'UTF8',\n\t\tFIRST_ROW = 2\n    )\n)\n\n\nCREATE EXTERNAL TABLE Sales.ExCustomers(\n    [ORDERNUMBER] VARCHAR(600) NULL\n)\nWITH(\n    LOCATION = 'sales_rawfile/sales_data_sample.csv',\n    DATA_SOURCE = SalesExSource,\n    FILE_FORMAT = SalesExfileF\n)\n\nSELECT *\nFROM Sales.ExCustomers\n\n\n\n\n\n\n\n\n\n\n\n\n\n\ndrop EXTERNAL TABLE Sales.ExCustomers\nDROP EXTERNAL FILE FORMAT SalesExfileF \nDROP EXTERNAL DATA SOURCE SalesExSource\n\n\n\n\n\n\n\n\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "sales_cg",
+						"poolName": "sales_cg"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 2')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "IF NOT EXISTS (SELECT * FROM sys.external_file_formats WHERE name = 'SynapseDelimitedTextFormat') \n\tCREATE EXTERNAL FILE FORMAT [SynapseDelimitedTextFormat] \n\tWITH ( FORMAT_TYPE = DELIMITEDTEXT ,\n\t       FORMAT_OPTIONS (\n\t\t\t FIELD_TERMINATOR = ',',\n\t\t\t USE_TYPE_DEFAULT = FALSE\n\t\t\t))\nGO\n\nIF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'root_stcgcasestudy_dfs_core_windows_net') \n\tCREATE EXTERNAL DATA SOURCE [root_stcgcasestudy_dfs_core_windows_net] \n\tWITH (\n\t\tLOCATION = 'abfss://root@stcgcasestudy.dfs.core.windows.net', \n\t\tTYPE = HADOOP \n\t)\nGO\n\nCREATE EXTERNAL TABLE SALE.EX (\n\t[C1] bigint,\n\t[C2] nvarchar(4000),\n\t[C3] nvarchar(4000),\n\t[C4] nvarchar(4000),\n\t[C5] nvarchar(4000),\n\t[C6] nvarchar(4000),\n\t[C7] nvarchar(4000),\n\t[C8] nvarchar(4000),\n\t[C9] nvarchar(4000),\n\t[C10] nvarchar(4000),\n\t[C11] nvarchar(4000),\n\t[C12] nvarchar(4000)\n\t)\n\tWITH (\n\tLOCATION = 'Sales_Transformed/dimCustomers.csv',\n\tDATA_SOURCE = [root_stcgcasestudy_dfs_core_windows_net],\n\tFILE_FORMAT = [SynapseDelimitedTextFormat]\n\t)\nGO\n\n\nSELECT TOP 100 * FROM SALE.EX\nGO",
 					"metadata": {
 						"language": "sql"
 					},
@@ -154,7 +174,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "56019251-942d-43b4-bb5e-fcbac2852688"
+						"spark.autotune.trackingId": "7ae3d20e-b400-4b92-8490-e08569203d7c"
 					}
 				},
 				"metadata": {
@@ -403,26 +423,6 @@
 			},
 			"dependsOn": [],
 			"location": "uksouth"
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/SQL script 2')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"content": {
-					"query": "IF NOT EXISTS (SELECT * FROM sys.external_file_formats WHERE name = 'SynapseDelimitedTextFormat') \n\tCREATE EXTERNAL FILE FORMAT [SynapseDelimitedTextFormat] \n\tWITH ( FORMAT_TYPE = DELIMITEDTEXT ,\n\t       FORMAT_OPTIONS (\n\t\t\t FIELD_TERMINATOR = ',',\n\t\t\t USE_TYPE_DEFAULT = FALSE\n\t\t\t))\nGO\n\nIF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'root_stcgcasestudy_dfs_core_windows_net') \n\tCREATE EXTERNAL DATA SOURCE [root_stcgcasestudy_dfs_core_windows_net] \n\tWITH (\n\t\tLOCATION = 'abfss://root@stcgcasestudy.dfs.core.windows.net', \n\t\tTYPE = HADOOP \n\t)\nGO\n\nCREATE EXTERNAL TABLE SALE.EX (\n\t[C1] bigint,\n\t[C2] nvarchar(4000),\n\t[C3] nvarchar(4000),\n\t[C4] nvarchar(4000),\n\t[C5] nvarchar(4000),\n\t[C6] nvarchar(4000),\n\t[C7] nvarchar(4000),\n\t[C8] nvarchar(4000),\n\t[C9] nvarchar(4000),\n\t[C10] nvarchar(4000),\n\t[C11] nvarchar(4000),\n\t[C12] nvarchar(4000)\n\t)\n\tWITH (\n\tLOCATION = 'Sales_Transformed/dimCustomers.csv',\n\tDATA_SOURCE = [root_stcgcasestudy_dfs_core_windows_net],\n\tFILE_FORMAT = [SynapseDelimitedTextFormat]\n\t)\nGO\n\n\nSELECT TOP 100 * FROM SALE.EX\nGO",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "sales_cg",
-						"poolName": "sales_cg"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
 		}
 	]
 }
