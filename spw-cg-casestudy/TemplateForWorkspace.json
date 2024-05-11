@@ -119,7 +119,7 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "\nCREATE TABLE #StageCustomers(\n    [Customer_Name] VARCHAR(100) NOT NULL,\n    [Phone] VARCHAR(50) NULL,\n\t[Address_Line1] VARCHAR(100) NULL,\n\t[Address_Line2] VARCHAR(100) NULL,\n\t[City] VARCHAR(50) NULL,\n\t[State] VARCHAR(50) NULL,\n\t[Postal_Code] VARCHAR(50) NULL,\n\t[Country] VARCHAR(50) NULL,\n\t[Territory] VARCHAR(50) NULL,\n\t[Contact_Lastname] VARCHAR(20) NULL,\n\t[Conact_Firstname] VARCHAR(20) NULL\n)\n\nSELECT *\nFROM #StageCustomers\n\n\nCOPY INTO #Sales.dimCustomers \nfrom 'https://stcgcasestudy.dfs.core.windows.net/root/Sales_Transformed/dimCustomers.csv'\nwith(\n    FILE_TYPE = 'CSV',\n    IDENTITY_INSERT= 'OFF',\n    FIRSTROW = 2\n)\n\n\nSELECT *\nFROM Sales.dimCustomers\n\n\n\nINSERT INTO #Sales.dimCustomers ([Customer_Name],\n    [Phone] ,\n\t[Address_Line1] ,\n\t[Address_Line2] ,\n\t[City] ,\n\t[State],\n\t[Postal_Code] ,\n\t[Country] ,\n\t[Territory] ,\n\t[Contact_Lastname] ,\n\t[Conact_Firstname] )\nfrom 'https://stcgcasestudy.dfs.core.windows.net/root/Sales_Transformed/dimCustomers.csv'\nwith(\n    FILE_TYPE = 'CSV',\n    IDENTITY_INSERT= 'OFF',\n    FIRSTROW = 2\n)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCREATE MASTER KEY ENCRYPTION BY PASSWORD = 'Hera@123'\n\nCREATE DATABASE SCOPED CREDENTIAL SalesCRED\nWITH IDENTITY = 'Account Key',\nSECRET= '547NffpVoMyDj7N2xeoebprS3OcYZ+FNt8aSWOEfZCVd2K6JjilClnRmYKRLvtW2N0ZP6Zk1t2z5+AStsUTFAw=='\n\n\n\n\n\n\nCREATE EXTERNAL DATA SOURCE SalesExSource\nWITH(\n    LOCATION = 'abfss://root@stcgcasestudy.dfs.core.windows.net',\n    CREDENTIAL = SalesCRED,\n    TYPE = HADOOP\n)\n\n\nCREATE EXTERNAL FILE FORMAT SalesExfileF WITH(\n    FORMAT_TYPE = DELIMITEDTEXT,\n\t--DATA_COMPRESSION = 'org.apache.hadoop.io.compress.GzipCodec',\n    FORMAT_OPTIONS(\n\t\tENCODING = 'UTF8',\n\t\tFIRST_ROW = 2\n    )\n)\n\n\nCREATE EXTERNAL TABLE Sales.ExCustomers(\n    [ORDERNUMBER] VARCHAR(600) NULL\n)\nWITH(\n    LOCATION = 'sales_rawfile/sales_data_sample.csv',\n    DATA_SOURCE = SalesExSource,\n    FILE_FORMAT = SalesExfileF\n)\n\nSELECT *\nFROM Sales.ExCustomers\n\n\n\n\n\n\n\n\n\n\n\n\n\n\ndrop EXTERNAL TABLE Sales.ExCustomers\nDROP EXTERNAL FILE FORMAT SalesExfileF \nDROP EXTERNAL DATA SOURCE SalesExSource\n\n\n\n\n\n\n\n\n\n",
+					"query": "\nCREATE TABLE #StageCustomers(\n    [Customer_Name] VARCHAR(100) NOT NULL,\n    [Phone] VARCHAR(50) NULL,\n\t[Address_Line1] VARCHAR(100) NULL,\n\t[Address_Line2] VARCHAR(100) NULL,\n\t[City] VARCHAR(50) NULL,\n\t[State] VARCHAR(50) NULL,\n\t[Postal_Code] VARCHAR(50) NULL,\n\t[Country] VARCHAR(50) NULL,\n\t[Territory] VARCHAR(50) NULL,\n\t[Contact_Lastname] VARCHAR(20) NULL,\n\t[Conact_Firstname] VARCHAR(20) NULL\n)\n\nSELECT *\nFROM #StageCustomers\n\n\nCOPY INTO #Sales.dimCustomers \nfrom 'https://stcgcasestudy.dfs.core.windows.net/root/Sales_Transformed/dimCustomers.csv'\nwith(\n    FILE_TYPE = 'CSV',\n    IDENTITY_INSERT= 'OFF',\n    FIRSTROW = 2\n)\n\n\nSELECT *\nFROM Sales.dimCustomers\n\n\n\nINSERT INTO #Sales.dimCustomers ([Customer_Name],\n    [Phone] ,\n\t[Address_Line1] ,\n\t[Address_Line2] ,\n\t[City] ,\n\t[State],\n\t[Postal_Code] ,\n\t[Country] ,\n\t[Territory] ,\n\t[Contact_Lastname] ,\n\t[Conact_Firstname] )\nfrom 'https://stcgcasestudy.dfs.core.windows.net/root/Sales_Transformed/dimCustomers.csv'\nwith(\n    FILE_TYPE = 'CSV',\n    IDENTITY_INSERT= 'OFF',\n    FIRSTROW = 2\n)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCREATE MASTER KEY ENCRYPTION BY PASSWORD = 'Hera@123'\n\nCREATE DATABASE SCOPED CREDENTIAL SalesCRED\nWITH IDENTITY = 'Account Key',\nSECRET= '547NffpVoMyDj7N2xeoebprS3OcYZ+FNt8aSWOEfZCVd2K6JjilClnRmYKRLvtW2N0ZP6Zk1t2z5+AStsUTFAw=='\n\n\n\n\n\n\nCREATE EXTERNAL DATA SOURCE SalesExSource\nWITH(\n    LOCATION = 'abfss://root@stcgcasestudy.dfs.core.windows.net',\n    CREDENTIAL = SalesCRED,\n    TYPE = HADOOP\n)\n\n\nCREATE EXTERNAL FILE FORMAT SalesExfileF WITH(\n    FORMAT_TYPE = DELIMITEDTEXT,\n\tDATA_COMPRESSION = 'org.apache.hadoop.io.compress.GzipCodec',\n\tFORMAT_OPTIONS(\n\t\tENCODING='UTF8'\n\t)\n)\n\n\nCREATE EXTERNAL TABLE Sales.ExCustomers(\n    [CUSTOMERNAME] VARCHAR(600) NULL\n)\nWITH(\n    LOCATION = 'Sales_Transformed/factOrders',\n    DATA_SOURCE = SalesExSource,\n    FILE_FORMAT = SalesExfileF\n)\n\nSELECT *\nFROM Sales.ExCustomers\n\n\n\n\n\n\n\n\n\n\n\n\n\ndrop EXTERNAL TABLE Sales.ExCustomers\nDROP EXTERNAL FILE FORMAT SalesExfileF \nDROP EXTERNAL DATA SOURCE SalesExSource\n\n\n\n\n\n\n\n\n\n\n",
 					"metadata": {
 						"language": "sql"
 					},
@@ -174,7 +174,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "7ae3d20e-b400-4b92-8490-e08569203d7c"
+						"spark.autotune.trackingId": "433630e7-f424-4822-8a5d-f583b91ebe3f"
 					}
 				},
 				"metadata": {
@@ -223,7 +223,7 @@
 							"import pandas as pd"
 						],
 						"outputs": [],
-						"execution_count": 218
+						"execution_count": 1
 					},
 					{
 						"cell_type": "code",
@@ -243,7 +243,7 @@
 							"#sales_data.head(10)"
 						],
 						"outputs": [],
-						"execution_count": 219
+						"execution_count": 2
 					},
 					{
 						"cell_type": "code",
@@ -265,7 +265,7 @@
 							"sales_data.drop(un_columns,axis=1,inplace=True)"
 						],
 						"outputs": [],
-						"execution_count": 220
+						"execution_count": 3
 					},
 					{
 						"cell_type": "code",
@@ -296,7 +296,7 @@
 							"sales_data.info()"
 						],
 						"outputs": [],
-						"execution_count": 221
+						"execution_count": 4
 					},
 					{
 						"cell_type": "code",
@@ -325,7 +325,7 @@
 							"else ('Medium' if x >= 3000 and x < 6000 else 'Large'))"
 						],
 						"outputs": [],
-						"execution_count": 222
+						"execution_count": 5
 					},
 					{
 						"cell_type": "code",
@@ -359,7 +359,7 @@
 							"factOrders = sales_data[['ORDERNUMBER','PRODUCTCODE','QUANTITYORDERED', 'PRICEEACH', 'SALES','CUSTOMERNAME']]"
 						],
 						"outputs": [],
-						"execution_count": 223
+						"execution_count": 6
 					},
 					{
 						"cell_type": "code",
@@ -377,11 +377,50 @@
 						"source": [
 							"#loading transformed data into the data lake\r\n",
 							"for file, filename in [(dimOrderDate, \"dimOrderDate\"), (dimProducts, \"dimProducts\"), (dimCustomers, \"dimCustomers\"), (dimSalesDeals, \"dimSalesDeals\"), (factOrders, \"factOrders\")]:\r\n",
-							"    file.to_csv(f\"{path}/Sales_Transformed/{filename}.csv\")\r\n",
+							"    file.to_parquet(f\"{path}/Sales_Transformed/{filename}.gzip\")\r\n",
 							""
 						],
 						"outputs": [],
-						"execution_count": 224
+						"execution_count": 10
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"dimCustomers = spark.createDataFrame(dimCustomers)"
+						],
+						"outputs": [],
+						"execution_count": 12
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"dimCustomers = dimCustomers.repartition(1)\r\n",
+							"dimCustomers.write.parquet(f\"{path}/Sales_Transformed/{filename}\",mode='overwrite')"
+						],
+						"outputs": [],
+						"execution_count": 21
 					}
 				]
 			},
