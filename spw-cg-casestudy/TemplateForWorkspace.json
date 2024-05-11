@@ -99,7 +99,7 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "\n--CREATE SCHEMA Sales\n\nCREATE TABLE Sales.dimOrderDate (\n    [Order_Number] INT NOT NULL,\n    [Order_Date] DATE NULL,\n    [Status] VARCHAR(20) NULL\n)\nWITH(CLUSTERED INDEX ([Order_Number]))\n\n--------------------------------------------\nCREATE TABLE Sales.dimProducts (\n    [Product_Code] VARCHAR NOT NULL,\n    [MSRP] INT NOT NULL,\n    [Product_Line] VARCHAR(50) NOT NULL\n)\nWITH(CLUSTERED INDEX ([Product_Code]))\n\n-----------------------------------------------\nCREATE TABLE Sales.dimSalesDeals(\n    [Sales] INT NOT NULL,\n    [Deal_Size] VARCHAR(30) NULL\n)\nWITH(CLUSTERED INDEX ([Sales]))\n\n----------------------------------------------\nCREATE TABLE Sales.dimCustomers(\n    [Customer_Name] VARCHAR(100) NOT NULL,\n    [Phone] VARCHAR(50) NULL,\n\t[Address_Line1] VARCHAR(100) NULL,\n\t[Address_Line2] VARCHAR(100) NULL,\n\t[City] VARCHAR(50) NULL,\n\t[State] VARCHAR(50) NULL,\n\t[Postal_Code] VARCHAR(50) NULL,\n\t[Country] VARCHAR(50) NULL,\n\t[Territory] VARCHAR(50) NULL,\n\t[Contact_Lastname] VARCHAR(20) NULL,\n\t[Conact_Firstname] VARCHAR(20) NULL\n)\nWITH(CLUSTERED INDEX ([Customer_Name]))\n\n---------------------------------------------\n\nCREATE TABLE Sales.factOrders(\n    [Order_Number] INT NOT NULL,\n    [Product_Code] INT NOT NULL,\n\t[Customer_Name] VARCHAR(100) NOT NULL,\n\t[Quantity_Ordered] INT NOT NULL,\n\t[Price_Each] INT NOT NULL,\n\t[Sales] INT NOT NULL\n\n)\nWITH(CLUSTERED INDEX ([Order_Number],[Product_Code]))\n\n\n",
+					"query": "\n--CREATE SCHEMA Sales\n\nCREATE TABLE Sales.dimOrderDate (\n    [Order_Number] INT NOT NULL,\n    [Order_Date] DATE NULL,\n    [Status] VARCHAR(20) NULL\n)\nWITH(CLUSTERED INDEX ([Order_Number]))\n\n--------------------------------------------\nCREATE TABLE Sales.dimProducts (\n    [Product_Code] VARCHAR NOT NULL,\n    [MSRP] INT NOT NULL,\n    [Product_Line] VARCHAR(50) NOT NULL\n)\nWITH(CLUSTERED INDEX ([Product_Code]))\n\n-----------------------------------------------\nCREATE TABLE Sales.dimSalesDeals(\n    [Sales] INT NOT NULL,\n    [Deal_Size] VARCHAR(30) NULL\n)\nWITH(CLUSTERED INDEX ([Sales]))\n\n----------------------------------------------\nCREATE TABLE Sales.dimCustomers(\n    [Customer_Name] VARCHAR(100) NOT NULL,\n    [Phone] VARCHAR(50) NULL,\n\t[Address_Line1] VARCHAR(100) NULL,\n\t[Address_Line2] VARCHAR(100) NULL,\n\t[City] VARCHAR(50) NULL,\n\t[State] VARCHAR(50) NULL,\n\t[Postal_Code] VARCHAR(50) NULL,\n\t[Country] VARCHAR(50) NULL,\n\t[Territory] VARCHAR(50) NULL,\n\t[Contact_Lastname] VARCHAR(20) NULL,\n\t[Conact_Firstname] VARCHAR(20) NULL\n)\nWITH(CLUSTERED INDEX ([Customer_Name]))\n\n---------------------------------------------\n\nCREATE TABLE Sales.factOrders(\n    [Order_Number] INT NOT NULL,\n    [Product_Code] INT NOT NULL,\n\t[Customer_Name] VARCHAR(100) NOT NULL,\n\t[Quantity_Ordered] INT NOT NULL,\n\t[Price_Each] INT NOT NULL,\n\t[Sales] INT NOT NULL\n\n)\nWITH(CLUSTERED INDEX ([Order_Number],[Product_Code]))\n\n\n\n",
 					"metadata": {
 						"language": "sql"
 					},
@@ -134,7 +134,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "cc8fc721-0dd0-4a9d-9bf9-7d81c72b28d9"
+						"spark.autotune.trackingId": "f675621f-8d9e-47a8-968d-0d4395541fe5"
 					}
 				},
 				"metadata": {
@@ -383,6 +383,26 @@
 			},
 			"dependsOn": [],
 			"location": "uksouth"
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 1')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "\nCREATE TABLE #StageCustomers(\n    [Customer_Name] VARCHAR(100) NOT NULL,\n    [Phone] VARCHAR(50) NULL,\n\t[Address_Line1] VARCHAR(100) NULL,\n\t[Address_Line2] VARCHAR(100) NULL,\n\t[City] VARCHAR(50) NULL,\n\t[State] VARCHAR(50) NULL,\n\t[Postal_Code] VARCHAR(50) NULL,\n\t[Country] VARCHAR(50) NULL,\n\t[Territory] VARCHAR(50) NULL,\n\t[Contact_Lastname] VARCHAR(20) NULL,\n\t[Conact_Firstname] VARCHAR(20) NULL\n)\n\nSELECT *\nFROM #StageCustomers\n\n\nCOPY INTO #Sales.dimCustomers \nfrom 'https://stcgcasestudy.dfs.core.windows.net/root/Sales_Transformed/dimCustomers.csv'\nwith(\n    FILE_TYPE = 'CSV',\n    IDENTITY_INSERT= 'OFF',\n    FIRSTROW = 2\n)\n\n\nSELECT *\nFROM Sales.dimCustomers\n\n\n\nINSERT INTO #Sales.dimCustomers ([Customer_Name],\n    [Phone] ,\n\t[Address_Line1] ,\n\t[Address_Line2] ,\n\t[City] ,\n\t[State],\n\t[Postal_Code] ,\n\t[Country] ,\n\t[Territory] ,\n\t[Contact_Lastname] ,\n\t[Conact_Firstname] )\nfrom 'https://stcgcasestudy.dfs.core.windows.net/root/Sales_Transformed/dimCustomers.csv'\nwith(\n    FILE_TYPE = 'CSV',\n    IDENTITY_INSERT= 'OFF',\n    FIRSTROW = 2\n)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCREATE MASTER KEY ENCRYPTION BY PASSWORD = 'Hera@123'\n\nCREATE DATABASE SCOPED CREDENTIAL SalesCRED\nWITH IDENTITY = 'Managed Identity'\n\nCREATE EXTERNAL DATA SOURCE SalesExSource\nWITH(\n    LOCATION = 'https://stcgcasestudy.dfs.core.windows.net/',\n    CREDENTIAL = SalesCRED\n)\n\nCREATE EXTERNAL FILE FORMAT SalesExfileF WITH(\n    FORMAT_TYPE = DELIMITEDTEXT,\n    FORMAT_OPTIONS(\n        FIRST_ROW = 1\n    )\n)\n\n\nCREATE EXTERNAL TABLE Sales.ExCustomers WITH(\n    LOCATION = 'root/Sales_ExternalFiles',\n    DATA_SOURCE = SalesExSource,\n    FILE_FORMAT = SalesExfileF\n)AS\nSELECT *\nFROM \nOPENROWSET(\n    BULK 'https://stcgcasestudy.dfs.core.windows.net/root/Sales_Transformed/dimCustomers.csv',\n    FORMAT = 'CSV',\n    PARSER_VERSION = '2.0'\n) AS ExternalCustomers \n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "sales_cg",
+						"poolName": "sales_cg"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
 		}
 	]
 }
