@@ -1,0 +1,17 @@
+{
+	"name": "SCD Type 1",
+	"properties": {
+		"content": {
+			"query": "\nINSERT INTO Sales.dimCustomers\nSELECT *\nFROM Sales.ExCustomers as stg\nWHERE NOT EXISTS(\n    SELECT *\n    FROM Sales.dimCustomers AS dim WHERE dim.Customer_Name = stg.Customer_Name\n)\nALTER INDEX ALL ON  Sales.dimCustomers REBUILD\n\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "sales_cg",
+				"poolName": "sales_cg"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
