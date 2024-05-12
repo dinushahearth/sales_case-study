@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "334e2e17-49f7-4a4e-87fb-0a6ebc31935f"
+				"spark.autotune.trackingId": "0b80dc10-a647-4972-a78a-876b8fbf6884"
 			}
 		},
 		"metadata": {
@@ -65,7 +65,7 @@
 					"#importing necessary libraries\r\n",
 					"import pandas as pd"
 				],
-				"execution_count": 1
+				"execution_count": 20
 			},
 			{
 				"cell_type": "code",
@@ -84,7 +84,7 @@
 					"#first 10 rows\r\n",
 					"#sales_data.head(10)"
 				],
-				"execution_count": 2
+				"execution_count": 21
 			},
 			{
 				"cell_type": "code",
@@ -105,7 +105,7 @@
 					"\r\n",
 					"sales_data.drop(un_columns,axis=1,inplace=True)"
 				],
-				"execution_count": 3
+				"execution_count": 22
 			},
 			{
 				"cell_type": "code",
@@ -135,7 +135,7 @@
 					"\r\n",
 					"sales_data.info()"
 				],
-				"execution_count": 4
+				"execution_count": 23
 			},
 			{
 				"cell_type": "code",
@@ -163,7 +163,7 @@
 					"sales_data['DEALSIZE'] = sales_data['SALES'].apply(lambda x: 'Small' if x >= 0 and x < 3000 \r\n",
 					"else ('Medium' if x >= 3000 and x < 6000 else 'Large'))"
 				],
-				"execution_count": 5
+				"execution_count": 24
 			},
 			{
 				"cell_type": "code",
@@ -196,7 +196,7 @@
 					"#Orders fact table\r\n",
 					"factOrders = sales_data[['ORDERNUMBER','PRODUCTCODE','QUANTITYORDERED', 'PRICEEACH', 'SALES','CUSTOMERNAME']]"
 				],
-				"execution_count": 6
+				"execution_count": 25
 			},
 			{
 				"cell_type": "code",
@@ -214,47 +214,11 @@
 				"source": [
 					"#loading transformed data into the data lake\r\n",
 					"for file, filename in [(dimOrderDate, \"dimOrderDate\"), (dimProducts, \"dimProducts\"), (dimCustomers, \"dimCustomers\"), (dimSalesDeals, \"dimSalesDeals\"), (factOrders, \"factOrders\")]:\r\n",
-					"    file.to_parquet(f\"{path}/Sales_Transformed/{filename}.gzip\")\r\n",
+					"    file = spark.createDataFrame(file).repartition(1)\r\n",
+					"    file.write.parquet(f\"{path}/Sales_Transformed/{filename}\",mode='overwrite')\r\n",
 					""
 				],
-				"execution_count": 10
-			},
-			{
-				"cell_type": "code",
-				"metadata": {
-					"jupyter": {
-						"source_hidden": false,
-						"outputs_hidden": false
-					},
-					"nteract": {
-						"transient": {
-							"deleting": false
-						}
-					}
-				},
-				"source": [
-					"dimCustomers = spark.createDataFrame(dimCustomers)"
-				],
-				"execution_count": 12
-			},
-			{
-				"cell_type": "code",
-				"metadata": {
-					"jupyter": {
-						"source_hidden": false,
-						"outputs_hidden": false
-					},
-					"nteract": {
-						"transient": {
-							"deleting": false
-						}
-					}
-				},
-				"source": [
-					"dimCustomers = dimCustomers.repartition(1)\r\n",
-					"dimCustomers.write.parquet(f\"{path}/Sales_Transformed/{filename}\",mode='overwrite')"
-				],
-				"execution_count": 21
+				"execution_count": 27
 			}
 		]
 	}
