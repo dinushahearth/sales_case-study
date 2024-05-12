@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "0b80dc10-a647-4972-a78a-876b8fbf6884"
+				"spark.autotune.trackingId": "11509e0e-9f2d-4656-aa8d-aa80d642e98f"
 			}
 		},
 		"metadata": {
@@ -65,7 +65,7 @@
 					"#importing necessary libraries\r\n",
 					"import pandas as pd"
 				],
-				"execution_count": 20
+				"execution_count": 28
 			},
 			{
 				"cell_type": "code",
@@ -84,7 +84,7 @@
 					"#first 10 rows\r\n",
 					"#sales_data.head(10)"
 				],
-				"execution_count": 21
+				"execution_count": 29
 			},
 			{
 				"cell_type": "code",
@@ -105,7 +105,7 @@
 					"\r\n",
 					"sales_data.drop(un_columns,axis=1,inplace=True)"
 				],
-				"execution_count": 22
+				"execution_count": 30
 			},
 			{
 				"cell_type": "code",
@@ -135,7 +135,7 @@
 					"\r\n",
 					"sales_data.info()"
 				],
-				"execution_count": 23
+				"execution_count": 31
 			},
 			{
 				"cell_type": "code",
@@ -163,7 +163,7 @@
 					"sales_data['DEALSIZE'] = sales_data['SALES'].apply(lambda x: 'Small' if x >= 0 and x < 3000 \r\n",
 					"else ('Medium' if x >= 3000 and x < 6000 else 'Large'))"
 				],
-				"execution_count": 24
+				"execution_count": 32
 			},
 			{
 				"cell_type": "code",
@@ -180,7 +180,7 @@
 				},
 				"source": [
 					"#OrderDate dimention table\r\n",
-					"dimOrderDate = sales_data[['ORDERNUMBER','ORDERDATE']].drop_duplicates().reset_index(drop=True)\r\n",
+					"dimOrderDate = sales_data[['ORDERNUMBER','ORDERDATE','STATUS']].drop_duplicates().reset_index(drop=True)\r\n",
 					"\r\n",
 					"#Products dimention table\r\n",
 					"dimProducts = sales_data[['PRODUCTCODE','MSRP','PRODUCTLINE']].drop_duplicates().reset_index(drop=True)\r\n",
@@ -196,7 +196,7 @@
 					"#Orders fact table\r\n",
 					"factOrders = sales_data[['ORDERNUMBER','PRODUCTCODE','QUANTITYORDERED', 'PRICEEACH', 'SALES','CUSTOMERNAME']]"
 				],
-				"execution_count": 25
+				"execution_count": 33
 			},
 			{
 				"cell_type": "code",
@@ -218,7 +218,7 @@
 					"    file.write.parquet(f\"{path}/Sales_Transformed/{filename}\",mode='overwrite')\r\n",
 					""
 				],
-				"execution_count": 27
+				"execution_count": 34
 			}
 		]
 	}
