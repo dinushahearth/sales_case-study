@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "eb4c6509-6f98-4dd5-9a14-4b4764295a82"
+				"spark.autotune.trackingId": "5785ccb8-d38c-4f03-a65f-84f693b60c73"
 			}
 		},
 		"metadata": {
@@ -65,7 +65,7 @@
 					"#importing necessary libraries\r\n",
 					"import pandas as pd"
 				],
-				"execution_count": 49
+				"execution_count": 59
 			},
 			{
 				"cell_type": "code",
@@ -84,7 +84,7 @@
 					"#first 10 rows\r\n",
 					"#sales_data.head(10)"
 				],
-				"execution_count": 50
+				"execution_count": 60
 			},
 			{
 				"cell_type": "code",
@@ -105,7 +105,7 @@
 					"\r\n",
 					"sales_data.drop(un_columns,axis=1,inplace=True)"
 				],
-				"execution_count": 51
+				"execution_count": 61
 			},
 			{
 				"cell_type": "code",
@@ -135,7 +135,7 @@
 					"\r\n",
 					"sales_data.info()"
 				],
-				"execution_count": 52
+				"execution_count": 62
 			},
 			{
 				"cell_type": "code",
@@ -163,7 +163,7 @@
 					"sales_data['DEALSIZE'] = sales_data['SALES'].apply(lambda x: 'Small' if x >= 0 and x < 3000 \r\n",
 					"else ('Medium' if x >= 3000 and x < 6000 else 'Large'))"
 				],
-				"execution_count": 53
+				"execution_count": 63
 			},
 			{
 				"cell_type": "code",
@@ -194,9 +194,9 @@
 					"dimSalesDeals = sales_data[['SALES','DEALSIZE']].drop_duplicates().reset_index(drop=True) #transitive dependency\r\n",
 					"\r\n",
 					"#Orders fact table\r\n",
-					"factOrders = sales_data[['ORDERNUMBER','PRODUCTCODE','CUSTOMERNAME','QUANTITYORDERED', 'PRICEEACH', 'SALES']]"
+					"factOrders = sales_data[['ORDERNUMBER','PRODUCTCODE','CUSTOMERNAME','QUANTITYORDERED', 'PRICEEACH', 'SALES','ORDERDATE','STATUS']]"
 				],
-				"execution_count": 54
+				"execution_count": 64
 			},
 			{
 				"cell_type": "code",
@@ -218,7 +218,7 @@
 					"    file.write.parquet(f\"{path}/Sales_Transformed/{filename}\",mode='overwrite')\r\n",
 					""
 				],
-				"execution_count": 55
+				"execution_count": 65
 			}
 		]
 	}
