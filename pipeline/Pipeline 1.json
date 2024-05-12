@@ -3,7 +3,8 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Notebook1",
+				"name": "Data Transformation",
+				"description": "The raw data is being transformed in this phase",
 				"type": "SynapseNotebook",
 				"dependsOn": [],
 				"policy": {
@@ -29,11 +30,12 @@
 				}
 			},
 			{
-				"name": "SQL pool stored procedure1",
+				"name": "Data Loading",
+				"description": "Data loading will be processed in this phase with SCD type 1",
 				"type": "SqlPoolStoredProcedure",
 				"dependsOn": [
 					{
-						"activity": "Notebook1",
+						"activity": "Data Transformation",
 						"dependencyConditions": [
 							"Completed"
 						]
