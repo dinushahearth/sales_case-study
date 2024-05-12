@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "11509e0e-9f2d-4656-aa8d-aa80d642e98f"
+				"spark.autotune.trackingId": "ceb68172-345d-446e-9c80-e8705067b4eb"
 			}
 		},
 		"metadata": {
@@ -65,7 +65,7 @@
 					"#importing necessary libraries\r\n",
 					"import pandas as pd"
 				],
-				"execution_count": 28
+				"execution_count": 35
 			},
 			{
 				"cell_type": "code",
@@ -84,7 +84,7 @@
 					"#first 10 rows\r\n",
 					"#sales_data.head(10)"
 				],
-				"execution_count": 29
+				"execution_count": 36
 			},
 			{
 				"cell_type": "code",
@@ -105,7 +105,7 @@
 					"\r\n",
 					"sales_data.drop(un_columns,axis=1,inplace=True)"
 				],
-				"execution_count": 30
+				"execution_count": 37
 			},
 			{
 				"cell_type": "code",
@@ -124,7 +124,7 @@
 					"#converting data types of the necessary columns\r\n",
 					"sales_data['ORDERDATE'] = pd.to_datetime(sales_data['ORDERDATE'])\r\n",
 					"\r\n",
-					"num_columns = ['ORDERNUMBER','QUANTITYORDERED','PRICEEACH','SALES']\r\n",
+					"num_columns = ['ORDERNUMBER','QUANTITYORDERED','PRICEEACH','SALES','MSRP']\r\n",
 					"\r\n",
 					"for col in num_columns:\r\n",
 					"    try:\r\n",
@@ -135,7 +135,7 @@
 					"\r\n",
 					"sales_data.info()"
 				],
-				"execution_count": 31
+				"execution_count": 38
 			},
 			{
 				"cell_type": "code",
@@ -163,7 +163,7 @@
 					"sales_data['DEALSIZE'] = sales_data['SALES'].apply(lambda x: 'Small' if x >= 0 and x < 3000 \r\n",
 					"else ('Medium' if x >= 3000 and x < 6000 else 'Large'))"
 				],
-				"execution_count": 32
+				"execution_count": 39
 			},
 			{
 				"cell_type": "code",
@@ -196,7 +196,7 @@
 					"#Orders fact table\r\n",
 					"factOrders = sales_data[['ORDERNUMBER','PRODUCTCODE','QUANTITYORDERED', 'PRICEEACH', 'SALES','CUSTOMERNAME']]"
 				],
-				"execution_count": 33
+				"execution_count": 40
 			},
 			{
 				"cell_type": "code",
@@ -218,7 +218,7 @@
 					"    file.write.parquet(f\"{path}/Sales_Transformed/{filename}\",mode='overwrite')\r\n",
 					""
 				],
-				"execution_count": 34
+				"execution_count": 41
 			}
 		]
 	}
