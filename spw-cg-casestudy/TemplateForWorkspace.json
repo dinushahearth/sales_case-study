@@ -114,12 +114,12 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/SQL script 1')]",
+			"name": "[concat(parameters('workspaceName'), '/ExternalTablesStaging SQL script 1')]",
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "\nCREATE TABLE #StageCustomers(\n    [Customer_Name] VARCHAR(100) NOT NULL,\n    [Phone] VARCHAR(50) NULL,\n\t[Address_Line1] VARCHAR(100) NULL,\n\t[Address_Line2] VARCHAR(100) NULL,\n\t[City] VARCHAR(50) NULL,\n\t[State] VARCHAR(50) NULL,\n\t[Postal_Code] VARCHAR(50) NULL,\n\t[Country] VARCHAR(50) NULL,\n\t[Territory] VARCHAR(50) NULL,\n\t[Contact_Lastname] VARCHAR(20) NULL,\n\t[Conact_Firstname] VARCHAR(20) NULL\n)\n\nSELECT *\nFROM #StageCustomers\n\n\nCOPY INTO #Sales.dimCustomers \nfrom 'https://stcgcasestudy.dfs.core.windows.net/root/Sales_Transformed/dimCustomers.csv'\nwith(\n    FILE_TYPE = 'CSV',\n    IDENTITY_INSERT= 'OFF',\n    FIRSTROW = 2\n)\n\n\nSELECT *\nFROM Sales.dimCustomers\n\n\n\nINSERT INTO #Sales.dimCustomers ([Customer_Name],\n    [Phone] ,\n\t[Address_Line1] ,\n\t[Address_Line2] ,\n\t[City] ,\n\t[State],\n\t[Postal_Code] ,\n\t[Country] ,\n\t[Territory] ,\n\t[Contact_Lastname] ,\n\t[Conact_Firstname] )\nfrom 'https://stcgcasestudy.dfs.core.windows.net/root/Sales_Transformed/dimCustomers.csv'\nwith(\n    FILE_TYPE = 'CSV',\n    IDENTITY_INSERT= 'OFF',\n    FIRSTROW = 2\n)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCREATE MASTER KEY ENCRYPTION BY PASSWORD = 'Hera@123'\n\nCREATE DATABASE SCOPED CREDENTIAL SalesCRED\nWITH IDENTITY = 'Account Key',\nSECRET= '547NffpVoMyDj7N2xeoebprS3OcYZ+FNt8aSWOEfZCVd2K6JjilClnRmYKRLvtW2N0ZP6Zk1t2z5+AStsUTFAw=='\n\n\n\n\n\n\nCREATE EXTERNAL DATA SOURCE SalesExSource\nWITH(\n    LOCATION = 'abfss://root@stcgcasestudy.dfs.core.windows.net',\n    CREDENTIAL = SalesCRED,\n    TYPE = HADOOP\n)\n\n\nCREATE EXTERNAL FILE FORMAT SalesExfileF WITH(\n    FORMAT_TYPE = DELIMITEDTEXT,\n\tDATA_COMPRESSION = 'org.apache.hadoop.io.compress.GzipCodec',\n\tFORMAT_OPTIONS(\n\t\tENCODING='UTF8'\n\t)\n)\n\n\nCREATE EXTERNAL TABLE Sales.ExCustomers(\n    [CUSTOMERNAME] VARCHAR(600) NULL\n)\nWITH(\n    LOCATION = 'Sales_Transformed/factOrders',\n    DATA_SOURCE = SalesExSource,\n    FILE_FORMAT = SalesExfileF\n)\n\nSELECT *\nFROM Sales.ExCustomers\n\n\n\n\n\n\n\n\n\n\n\n\n\ndrop EXTERNAL TABLE Sales.ExCustomers\nDROP EXTERNAL FILE FORMAT SalesExfileF \nDROP EXTERNAL DATA SOURCE SalesExSource\n\n\n\n\n\n\n\n\n\n\n",
+					"query": "\n/*\nCREATE MASTER KEY ENCRYPTION BY PASSWORD = 'Hera@123'\n\nCREATE DATABASE SCOPED CREDENTIAL SalesCRED\nWITH IDENTITY = 'Account Key',\nSECRET= '547NffpVoMyDj7N2xeoebprS3OcYZ+FNt8aSWOEfZCVd2K6JjilClnRmYKRLvtW2N0ZP6Zk1t2z5+AStsUTFAw=='\n\n\nCREATE EXTERNAL DATA SOURCE SalesExSource\nWITH(\n    LOCATION = 'abfss://root@stcgcasestudy.dfs.core.windows.net',\n    CREDENTIAL = SalesCRED,\n    TYPE = HADOOP\n)\n\nCREATE EXTERNAL FILE FORMAT SalesExfileF WITH(\n    FORMAT_TYPE = PARQUET\n\t--DATA_COMPRESSION = 'org.apache.hadoop.io.compress.SnappyCodec'\n)\n*/\n\nCREATE EXTERNAL TABLE Sales.ExCustomers(\n\t[Customer_Name] VARCHAR(100) NOT NULL,\n    [Phone] VARCHAR(50) NULL,\n\t[Address_Line1] VARCHAR(100) NULL,\n\t[Address_Line2] VARCHAR(100) NULL,\n\t[City] VARCHAR(50) NULL,\n\t[State] VARCHAR(50) NULL,\n\t[Postal_Code] VARCHAR(50) NULL,\n\t[Country] VARCHAR(50) NULL,\n\t[Territory] VARCHAR(50) NULL,\n\t[Contact_Lastname] VARCHAR(20) NULL,\n\t[Conact_Firstname] VARCHAR(20) NULL\n)\nWITH(\n    LOCATION = 'Sales_Transformed/dimCustomers',\n    DATA_SOURCE = SalesExSource,\n    FILE_FORMAT = SalesExfileF\n)\n\n\nCREATE EXTERNAL TABLE Sales.ExOrderDate (\n    [Order_Number] BIGINT NOT NULL, \n    [Order_Date] DATE NULL,\n    [Status] VARCHAR(20) NULL\n)\nWITH(\n    LOCATION = 'Sales_Transformed/dimOrderDate',\n    DATA_SOURCE = SalesExSource,\n    FILE_FORMAT = SalesExfileF\n)\n\n\nCREATE EXTERNAL TABLE Sales.ExProducts(\n    [Product_Code] VARCHAR(50) NOT NULL,\n    [MSRP] BIGINT NOT NULL,\n    [Product_Line] VARCHAR(50) NOT NULL\n)\nWITH(\n    LOCATION = 'Sales_Transformed/dimProducts',\n    DATA_SOURCE = SalesExSource,\n    FILE_FORMAT = SalesExfileF\n)\n\n\n\n\n\nCREATE EXTERNAL TABLE Sales.ExSalesDeals(\n    [Sales] FLOAT NOT NULL,\n    [Deal_Size] VARCHAR(30) NULL\n)\nWITH(\n    LOCATION = 'Sales_Transformed/dimSalesDeals',\n    DATA_SOURCE = SalesExSource,\n    FILE_FORMAT = SalesExfileF\n)\n\n\n\n\nCREATE EXTERNAL TABLE Sales.ExOrders(\n    [Order_Number] BIGINT NOT NULL,\n    [Product_Code] VARCHAR(50) NOT NULL,\n\t[Customer_Name] VARCHAR(100) NOT NULL,\n\t[Quantity_Ordered] BIGINT NOT NULL,\n\t[Price_Each] FLOAT NOT NULL,\n\t[Sales] FLOAT NOT NULL\n\n)\nWITH(\n    LOCATION = 'Sales_Transformed/factOrders',\n    DATA_SOURCE = SalesExSource,\n    FILE_FORMAT = SalesExfileF\n)\n\n\n\n\n\n\n\n\n",
 					"metadata": {
 						"language": "sql"
 					},
@@ -139,7 +139,7 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "IF NOT EXISTS (SELECT * FROM sys.external_file_formats WHERE name = 'SynapseDelimitedTextFormat') \n\tCREATE EXTERNAL FILE FORMAT [SynapseDelimitedTextFormat] \n\tWITH ( FORMAT_TYPE = DELIMITEDTEXT ,\n\t       FORMAT_OPTIONS (\n\t\t\t FIELD_TERMINATOR = ',',\n\t\t\t USE_TYPE_DEFAULT = FALSE\n\t\t\t))\nGO\n\nIF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'root_stcgcasestudy_dfs_core_windows_net') \n\tCREATE EXTERNAL DATA SOURCE [root_stcgcasestudy_dfs_core_windows_net] \n\tWITH (\n\t\tLOCATION = 'abfss://root@stcgcasestudy.dfs.core.windows.net', \n\t\tTYPE = HADOOP \n\t)\nGO\n\nCREATE EXTERNAL TABLE SALE.EX (\n\t[C1] bigint,\n\t[C2] nvarchar(4000),\n\t[C3] nvarchar(4000),\n\t[C4] nvarchar(4000),\n\t[C5] nvarchar(4000),\n\t[C6] nvarchar(4000),\n\t[C7] nvarchar(4000),\n\t[C8] nvarchar(4000),\n\t[C9] nvarchar(4000),\n\t[C10] nvarchar(4000),\n\t[C11] nvarchar(4000),\n\t[C12] nvarchar(4000)\n\t)\n\tWITH (\n\tLOCATION = 'Sales_Transformed/dimCustomers.csv',\n\tDATA_SOURCE = [root_stcgcasestudy_dfs_core_windows_net],\n\tFILE_FORMAT = [SynapseDelimitedTextFormat]\n\t)\nGO\n\n\nSELECT TOP 100 * FROM SALE.EX\nGO",
+					"query": "\nCREATE TABLE #StageCustomers(\n    [Customer_Name] VARCHAR(100) NOT NULL,\n    [Phone] VARCHAR(50) NULL,\n\t[Address_Line1] VARCHAR(100) NULL,\n\t[Address_Line2] VARCHAR(100) NULL,\n\t[City] VARCHAR(50) NULL,\n\t[State] VARCHAR(50) NULL,\n\t[Postal_Code] VARCHAR(50) NULL,\n\t[Country] VARCHAR(50) NULL,\n\t[Territory] VARCHAR(50) NULL,\n\t[Contact_Lastname] VARCHAR(20) NULL,\n\t[Conact_Firstname] VARCHAR(20) NULL\n)\n\nSELECT *\nFROM #StageCustomers\n\n\nCOPY INTO #Sales.dimCustomers \nfrom 'https://stcgcasestudy.dfs.core.windows.net/root/Sales_Transformed/dimCustomers.csv'\nwith(\n    FILE_TYPE = 'CSV',\n    IDENTITY_INSERT= 'OFF',\n    FIRSTROW = 2\n)\n\n\nSELECT *\nFROM Sales.dimCustomers\n\n/*\n\n\ndrop EXTERNAL TABLE Sales.ExCustomers\nDROP EXTERNAL FILE FORMAT SalesExfileF \nDROP EXTERNAL DATA SOURCE SalesExSource\n\n\n\n*/\n\nINSERT INTO Sales.dimCustomers ([Customer_Name],\n    [Phone] ,\n\t[Address_Line1] ,\n\t[Address_Line2] ,\n\t[City] ,\n\t[State],\n\t[Postal_Code] ,\n\t[Country] ,\n\t[Territory] ,\n\t[Contact_Lastname] ,\n\t[Conact_Firstname] )\nfrom 'https://stcgcasestudy.dfs.core.windows.net/root/Sales_Transformed/dimCustomers.csv'\nwith(\n    FILE_TYPE = 'CSV',\n    IDENTITY_INSERT= 'OFF',\n    FIRSTROW = 2\n)\n",
 					"metadata": {
 						"language": "sql"
 					},
@@ -174,7 +174,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "433630e7-f424-4822-8a5d-f583b91ebe3f"
+						"spark.autotune.trackingId": "3b084997-65dc-4157-a162-a6efc13b02b3"
 					}
 				},
 				"metadata": {
@@ -223,7 +223,7 @@
 							"import pandas as pd"
 						],
 						"outputs": [],
-						"execution_count": 1
+						"execution_count": 49
 					},
 					{
 						"cell_type": "code",
@@ -243,7 +243,7 @@
 							"#sales_data.head(10)"
 						],
 						"outputs": [],
-						"execution_count": 2
+						"execution_count": 50
 					},
 					{
 						"cell_type": "code",
@@ -265,7 +265,7 @@
 							"sales_data.drop(un_columns,axis=1,inplace=True)"
 						],
 						"outputs": [],
-						"execution_count": 3
+						"execution_count": 51
 					},
 					{
 						"cell_type": "code",
@@ -284,7 +284,7 @@
 							"#converting data types of the necessary columns\r\n",
 							"sales_data['ORDERDATE'] = pd.to_datetime(sales_data['ORDERDATE'])\r\n",
 							"\r\n",
-							"num_columns = ['ORDERNUMBER','QUANTITYORDERED','PRICEEACH','SALES']\r\n",
+							"num_columns = ['ORDERNUMBER','QUANTITYORDERED','PRICEEACH','SALES','MSRP']\r\n",
 							"\r\n",
 							"for col in num_columns:\r\n",
 							"    try:\r\n",
@@ -296,7 +296,7 @@
 							"sales_data.info()"
 						],
 						"outputs": [],
-						"execution_count": 4
+						"execution_count": 52
 					},
 					{
 						"cell_type": "code",
@@ -325,7 +325,7 @@
 							"else ('Medium' if x >= 3000 and x < 6000 else 'Large'))"
 						],
 						"outputs": [],
-						"execution_count": 5
+						"execution_count": 53
 					},
 					{
 						"cell_type": "code",
@@ -342,7 +342,7 @@
 						},
 						"source": [
 							"#OrderDate dimention table\r\n",
-							"dimOrderDate = sales_data[['ORDERNUMBER','ORDERDATE']].drop_duplicates().reset_index(drop=True)\r\n",
+							"dimOrderDate = sales_data[['ORDERNUMBER','ORDERDATE','STATUS']].drop_duplicates().reset_index(drop=True)\r\n",
 							"\r\n",
 							"#Products dimention table\r\n",
 							"dimProducts = sales_data[['PRODUCTCODE','MSRP','PRODUCTLINE']].drop_duplicates().reset_index(drop=True)\r\n",
@@ -356,10 +356,10 @@
 							"dimSalesDeals = sales_data[['SALES','DEALSIZE']].drop_duplicates().reset_index(drop=True) #transitive dependency\r\n",
 							"\r\n",
 							"#Orders fact table\r\n",
-							"factOrders = sales_data[['ORDERNUMBER','PRODUCTCODE','QUANTITYORDERED', 'PRICEEACH', 'SALES','CUSTOMERNAME']]"
+							"factOrders = sales_data[['ORDERNUMBER','PRODUCTCODE','CUSTOMERNAME','QUANTITYORDERED', 'PRICEEACH', 'SALES']]"
 						],
 						"outputs": [],
-						"execution_count": 6
+						"execution_count": 54
 					},
 					{
 						"cell_type": "code",
@@ -377,54 +377,28 @@
 						"source": [
 							"#loading transformed data into the data lake\r\n",
 							"for file, filename in [(dimOrderDate, \"dimOrderDate\"), (dimProducts, \"dimProducts\"), (dimCustomers, \"dimCustomers\"), (dimSalesDeals, \"dimSalesDeals\"), (factOrders, \"factOrders\")]:\r\n",
-							"    file.to_parquet(f\"{path}/Sales_Transformed/{filename}.gzip\")\r\n",
+							"    file = spark.createDataFrame(file).repartition(1)\r\n",
+							"    file.write.parquet(f\"{path}/Sales_Transformed/{filename}\",mode='overwrite')\r\n",
 							""
 						],
 						"outputs": [],
-						"execution_count": 10
-					},
-					{
-						"cell_type": "code",
-						"metadata": {
-							"jupyter": {
-								"source_hidden": false,
-								"outputs_hidden": false
-							},
-							"nteract": {
-								"transient": {
-									"deleting": false
-								}
-							}
-						},
-						"source": [
-							"dimCustomers = spark.createDataFrame(dimCustomers)"
-						],
-						"outputs": [],
-						"execution_count": 12
-					},
-					{
-						"cell_type": "code",
-						"metadata": {
-							"jupyter": {
-								"source_hidden": false,
-								"outputs_hidden": false
-							},
-							"nteract": {
-								"transient": {
-									"deleting": false
-								}
-							}
-						},
-						"source": [
-							"dimCustomers = dimCustomers.repartition(1)\r\n",
-							"dimCustomers.write.parquet(f\"{path}/Sales_Transformed/{filename}\",mode='overwrite')"
-						],
-						"outputs": [],
-						"execution_count": 21
+						"execution_count": 55
 					}
 				]
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sales_cg')]",
+			"type": "Microsoft.Synapse/workspaces/sqlPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"collation": "SQL_Latin1_General_CP1_CI_AS",
+				"maxSizeBytes": 263882790666240,
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "uksouth"
 		},
 		{
 			"name": "[concat(parameters('workspaceName'), '/salespycg')]",
@@ -452,16 +426,24 @@
 			"location": "uksouth"
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/sales_cg')]",
-			"type": "Microsoft.Synapse/workspaces/sqlPools",
+			"name": "[concat(parameters('workspaceName'), '/SCD Type 1')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
-				"collation": "SQL_Latin1_General_CP1_CI_AS",
-				"maxSizeBytes": 263882790666240,
-				"annotations": []
+				"content": {
+					"query": "------------------------------------------------------------------------------------------------------------------------------------------------------------\n\n---Insert new records\nINSERT INTO Sales.dimCustomers\nSELECT *\nFROM Sales.ExCustomers as stg\nWHERE NOT EXISTS(\n    SELECT *\n    FROM Sales.dimCustomers AS dim WHERE dim.Customer_Name = stg.Customer_Name\n)\n\n---SCD Type 1\nUPDATE Sales.dimCustomers\nSET dim.Customer_Name = stg.Customer_Name,\n    dim.Phone =  stg.Phone ,\n    dim.Address_Line1 =  stg.Address_Line1,\n    dim.Address_Line2 =  stg.Address_Line2,\n    dim.City =  stg.City, \n    dim.State =  stg.State, \n    dim.Postal_Code =  stg.Postal_Code,\n    dim.Country =  stg.Country, \n    dim.Territory =  stg.Territory, \n    dim.Contact_Lastname =  stg.Contact_Lastname,\n    dim.Conact_Firstname =  stg.Conact_Firstname\nFROM Sales.dimCustomers AS dim INNER JOIN Sales.ExCustomers AS stg\nON dim.Customer_Name = stg.Customer_Name\nWHERE dim.Phone <> stg.Phone \nOR dim.Address_Line1 <> stg.Address_Line1 \nOR dim.Address_Line2 <> stg.Address_Line2\nOR dim.City <> stg.City \nOR dim.State <> stg.State \nOR dim.Postal_Code <> stg.Postal_Code\nOR dim.Country <> stg.Country \nOR dim.Territory <> stg.Territory \nOR dim.Contact_Lastname <> stg.Contact_Lastname\nOR dim.Conact_Firstname <> stg.Conact_Firstname\n\nALTER INDEX ALL ON  Sales.dimCustomers REBUILD\n------------------------------------------------------------------------------------------------------------------------------------------------------------\n\n\nINSERT INTO Sales.dimOrderDate\nSELECT *\nFROM Sales.ExOrderDate AS stg\nWHERE NOT EXISTS(\n    SELECT *\n    FROM Sales.dimOrderDate AS dim WHERE dim.Order_Number = stg.Order_Number \n)\n\nUPDATE Sales.dimOrderDate\nSET dim.Order_Date = stg.Order_Date,\n    dim.Status = stg.Status \nFROM Sales.dimOrderDate AS dim INNER JOIN Sales.dimOrderDate AS stg ON dim.Order_Number = stg.Order_Number \nWHERE dim.Order_Date <> stg.Order_Date OR dim.Status <> stg.Status \n\nALTER INDEX ALL ON Sales.dimOrderDate REBUILD\n\n------------------------------------------------------------------------------------------------------------------------------------------------------------\n\n\n\nINSERT INTO Sales.dimProducts\nSELECT *\nFROM Sales.ExProducts AS stg\nWHERE NOT EXISTS(\n    SELECT *\n    FROM Sales.dimProducts AS dim WHERE dim.Product_Code = stg.Product_Code\n)\n\nUPDATE Sales.dimProducts\nSET dim.MSRP = stg.MSRP,\n    dim.Product_Line = stg.Product_Line\nFROM Sales.dimProducts AS dim INNER JOIN Sales.ExProducts AS  stg ON dim.Product_Code = stg.Product_Code\nWHERE dim.MSRP <> stg.MSRP OR dim.Product_Line <> stg.Product_Line\n\nALTER INDEX ALL ON Sales.dimProducts REBUILD\n\n------------------------------------------------------------------------------------------------------------------------------------------------------------\n\n\nINSERT INTO Sales.dimSalesDeals\nSELECT *\nFROM Sales.ExSalesDeals AS stg\nWHERE NOT EXISTS(\n    SELECT *\n    FROM Sales.dimSalesDeals AS dim WHERE dim.Sales = stg.Sales\n)\n\nUPDATE Sales.dimSalesDeals\nSET dim.Deal_Size = stg.Deal_Size\nFROM Sales.dimSalesDealsAS dim INNER JOIN Sales.ExSalesDeals AS stg ON dim.Sales = stg.Sales\nWHERE dim.Deal_Size <> stg.Deal_Size \n\nALTER INDEX ALL ON Sales.dimSalesDeals REBUILD\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "sales_cg",
+						"poolName": "sales_cg"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
 			},
-			"dependsOn": [],
-			"location": "uksouth"
+			"dependsOn": []
 		}
 	]
 }
