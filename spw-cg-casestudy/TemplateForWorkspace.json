@@ -99,7 +99,7 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "\n--CREATE SCHEMA Sales\n\nCREATE TABLE Sales.dimOrderDate (\n    [Order_Number] INT NOT NULL,\n    [Order_Date] DATE NULL,\n    [Status] VARCHAR(20) NULL\n)\nWITH(CLUSTERED INDEX ([Order_Number]))\n\n--------------------------------------------\nCREATE TABLE Sales.dimProducts (\n    [Product_Code] VARCHAR NOT NULL,\n    [MSRP] INT NOT NULL,\n    [Product_Line] VARCHAR(50) NOT NULL\n)\nWITH(CLUSTERED INDEX ([Product_Code]))\n\n-----------------------------------------------\nCREATE TABLE Sales.dimSalesDeals(\n    [Sales] INT NOT NULL,\n    [Deal_Size] VARCHAR(30) NULL\n)\nWITH(CLUSTERED INDEX ([Sales]))\n\n----------------------------------------------\nCREATE TABLE Sales.dimCustomers(\n    [Customer_Name] VARCHAR(100) NOT NULL,\n    [Phone] VARCHAR(50) NULL,\n\t[Address_Line1] VARCHAR(100) NULL,\n\t[Address_Line2] VARCHAR(100) NULL,\n\t[City] VARCHAR(50) NULL,\n\t[State] VARCHAR(50) NULL,\n\t[Postal_Code] VARCHAR(50) NULL,\n\t[Country] VARCHAR(50) NULL,\n\t[Territory] VARCHAR(50) NULL,\n\t[Contact_Lastname] VARCHAR(20) NULL,\n\t[Conact_Firstname] VARCHAR(20) NULL\n)\nWITH(CLUSTERED INDEX ([Customer_Name]))\n\n---------------------------------------------\n\nCREATE TABLE Sales.factOrders(\n    [Order_Number] INT NOT NULL,\n    [Product_Code] INT NOT NULL,\n\t[Customer_Name] VARCHAR(100) NOT NULL,\n\t[Quantity_Ordered] INT NOT NULL,\n\t[Price_Each] INT NOT NULL,\n\t[Sales] INT NOT NULL\n\n)\nWITH(CLUSTERED INDEX ([Order_Number],[Product_Code]))\n\n\n\n\n\n\n",
+					"query": "\n--CREATE SCHEMA Sales\n\nCREATE TABLE Sales.dimOrderDate (\n    [Order_Number] INT NOT NULL,\n    [Order_Date] DATE NULL,\n    [Status] VARCHAR(20) NULL\n)\nWITH(CLUSTERED INDEX ([Order_Number]))\n\n--------------------------------------------\nCREATE TABLE Sales.dimProducts (\n    [Product_Code] VARCHAR NOT NULL,\n    [MSRP] INT NOT NULL,\n    [Product_Line] VARCHAR(50) NOT NULL\n)\nWITH(CLUSTERED INDEX ([Product_Code]))\n\n-----------------------------------------------\nCREATE TABLE Sales.dimSalesDeals(\n    [Sales] INT NOT NULL,\n    [Deal_Size] VARCHAR(30) NULL\n)\nWITH(CLUSTERED INDEX ([Sales]))\n\n----------------------------------------------\nCREATE TABLE Sales.dimCustomers(\n    [Customer_Name] VARCHAR(100) NOT NULL,\n    [Phone] VARCHAR(50) NULL,\n\t[Address_Line1] VARCHAR(100) NULL,\n\t[Address_Line2] VARCHAR(100) NULL,\n\t[City] VARCHAR(50) NULL,\n\t[State] VARCHAR(50) NULL,\n\t[Postal_Code] VARCHAR(50) NULL,\n\t[Country] VARCHAR(50) NULL,\n\t[Territory] VARCHAR(50) NULL,\n\t[Contact_Lastname] VARCHAR(20) NULL,\n\t[Conact_Firstname] VARCHAR(20) NULL\n)\nWITH(CLUSTERED INDEX ([Customer_Name]))\n\n---------------------------------------------\n\nCREATE TABLE Sales.factOrders(\n    [Order_Number] INT NOT NULL,\n    [Product_Code] VARCHAR(30) NOT NULL,\n\t[Customer_Name] VARCHAR(100) NOT NULL,\n\t[Quantity_Ordered] INT NOT NULL,\n\t[Price_Each] INT NOT NULL,\n\t[Sales] FLOAT NOT NULL,\n\t[Order_Date] DATE NULL,\n    [Status] VARCHAR(20) NULL\n\n)\nWITH(CLUSTERED INDEX ([Order_Number],[Product_Code]))\n\n\n\n\n\n\n\n\n",
 					"metadata": {
 						"language": "sql"
 					},
@@ -119,7 +119,7 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "\n/*\nCREATE MASTER KEY ENCRYPTION BY PASSWORD = 'Hera@123'\n\nCREATE DATABASE SCOPED CREDENTIAL SalesCRED\nWITH IDENTITY = 'Account Key',\nSECRET= '547NffpVoMyDj7N2xeoebprS3OcYZ+FNt8aSWOEfZCVd2K6JjilClnRmYKRLvtW2N0ZP6Zk1t2z5+AStsUTFAw=='\n\n\nCREATE EXTERNAL DATA SOURCE SalesExSource\nWITH(\n    LOCATION = 'abfss://root@stcgcasestudy.dfs.core.windows.net',\n    CREDENTIAL = SalesCRED,\n    TYPE = HADOOP\n)\n\nCREATE EXTERNAL FILE FORMAT SalesExfileF WITH(\n    FORMAT_TYPE = PARQUET\n\t--DATA_COMPRESSION = 'org.apache.hadoop.io.compress.SnappyCodec'\n)\n*/\n\nCREATE EXTERNAL TABLE Sales.ExCustomers(\n\t[Customer_Name] VARCHAR(100) NOT NULL,\n    [Phone] VARCHAR(50) NULL,\n\t[Address_Line1] VARCHAR(100) NULL,\n\t[Address_Line2] VARCHAR(100) NULL,\n\t[City] VARCHAR(50) NULL,\n\t[State] VARCHAR(50) NULL,\n\t[Postal_Code] VARCHAR(50) NULL,\n\t[Country] VARCHAR(50) NULL,\n\t[Territory] VARCHAR(50) NULL,\n\t[Contact_Lastname] VARCHAR(20) NULL,\n\t[Conact_Firstname] VARCHAR(20) NULL\n)\nWITH(\n    LOCATION = 'Sales_Transformed/dimCustomers',\n    DATA_SOURCE = SalesExSource,\n    FILE_FORMAT = SalesExfileF\n)\n\n\nCREATE EXTERNAL TABLE Sales.ExOrderDate (\n    [Order_Number] BIGINT NOT NULL, \n    [Order_Date] DATE NULL,\n    [Status] VARCHAR(20) NULL\n)\nWITH(\n    LOCATION = 'Sales_Transformed/dimOrderDate',\n    DATA_SOURCE = SalesExSource,\n    FILE_FORMAT = SalesExfileF\n)\n\n\nCREATE EXTERNAL TABLE Sales.ExProducts(\n    [Product_Code] VARCHAR(50) NOT NULL,\n    [MSRP] BIGINT NOT NULL,\n    [Product_Line] VARCHAR(50) NOT NULL\n)\nWITH(\n    LOCATION = 'Sales_Transformed/dimProducts',\n    DATA_SOURCE = SalesExSource,\n    FILE_FORMAT = SalesExfileF\n)\n\n\n\n\n\nCREATE EXTERNAL TABLE Sales.ExSalesDeals(\n    [Sales] FLOAT NOT NULL,\n    [Deal_Size] VARCHAR(30) NULL\n)\nWITH(\n    LOCATION = 'Sales_Transformed/dimSalesDeals',\n    DATA_SOURCE = SalesExSource,\n    FILE_FORMAT = SalesExfileF\n)\n\n\n\n\nCREATE EXTERNAL TABLE Sales.ExOrders(\n    [Order_Number] BIGINT NOT NULL,\n    [Product_Code] VARCHAR(50) NOT NULL,\n\t[Customer_Name] VARCHAR(100) NOT NULL,\n\t[Quantity_Ordered] BIGINT NOT NULL,\n\t[Price_Each] FLOAT NOT NULL,\n\t[Sales] FLOAT NOT NULL\n\n)\nWITH(\n    LOCATION = 'Sales_Transformed/factOrders',\n    DATA_SOURCE = SalesExSource,\n    FILE_FORMAT = SalesExfileF\n)\n\n\n\n\n\n\n\n\n",
+					"query": "\n/*\nCREATE MASTER KEY ENCRYPTION BY PASSWORD = 'Hera@123'\n\nCREATE DATABASE SCOPED CREDENTIAL SalesCRED\nWITH IDENTITY = 'Account Key',\nSECRET= '547NffpVoMyDj7N2xeoebprS3OcYZ+FNt8aSWOEfZCVd2K6JjilClnRmYKRLvtW2N0ZP6Zk1t2z5+AStsUTFAw=='\n\n\nCREATE EXTERNAL DATA SOURCE SalesExSource\nWITH(\n    LOCATION = 'abfss://root@stcgcasestudy.dfs.core.windows.net',\n    CREDENTIAL = SalesCRED,\n    TYPE = HADOOP\n)\n\nCREATE EXTERNAL FILE FORMAT SalesExfileF WITH(\n    FORMAT_TYPE = PARQUET\n\t--DATA_COMPRESSION = 'org.apache.hadoop.io.compress.SnappyCodec'\n)\n*/\n\nCREATE EXTERNAL TABLE Sales.ExCustomers(\n\t[Customer_Name] VARCHAR(100) NOT NULL,\n    [Phone] VARCHAR(50) NULL,\n\t[Address_Line1] VARCHAR(100) NULL,\n\t[Address_Line2] VARCHAR(100) NULL,\n\t[City] VARCHAR(50) NULL,\n\t[State] VARCHAR(50) NULL,\n\t[Postal_Code] VARCHAR(50) NULL,\n\t[Country] VARCHAR(50) NULL,\n\t[Territory] VARCHAR(50) NULL,\n\t[Contact_Lastname] VARCHAR(20) NULL,\n\t[Conact_Firstname] VARCHAR(20) NULL\n)\nWITH(\n    LOCATION = 'Sales_Transformed/dimCustomers',\n    DATA_SOURCE = SalesExSource,\n    FILE_FORMAT = SalesExfileF\n)\n\n\nCREATE EXTERNAL TABLE Sales.ExOrderDate (\n    [Order_Number] BIGINT NOT NULL, \n    [Order_Date] DATE NULL,\n    [Status] VARCHAR(20) NULL\n)\nWITH(\n    LOCATION = 'Sales_Transformed/dimOrderDate',\n    DATA_SOURCE = SalesExSource,\n    FILE_FORMAT = SalesExfileF\n)\n\n\nCREATE EXTERNAL TABLE Sales.ExProducts(\n    [Product_Code] VARCHAR(50) NOT NULL,\n    [MSRP] BIGINT NOT NULL,\n    [Product_Line] VARCHAR(50) NOT NULL\n)\nWITH(\n    LOCATION = 'Sales_Transformed/dimProducts',\n    DATA_SOURCE = SalesExSource,\n    FILE_FORMAT = SalesExfileF\n)\n\n\n\n\n\nCREATE EXTERNAL TABLE Sales.ExSalesDeals(\n    [Sales] FLOAT NOT NULL,\n    [Deal_Size] VARCHAR(30) NULL\n)\nWITH(\n    LOCATION = 'Sales_Transformed/dimSalesDeals',\n    DATA_SOURCE = SalesExSource,\n    FILE_FORMAT = SalesExfileF\n)\n\n\n\n\nCREATE EXTERNAL TABLE Sales.ExOrders(\n    [Order_Number] BIGINT NOT NULL,\n    [Product_Code] VARCHAR(50) NOT NULL,\n\t[Customer_Name] VARCHAR(100) NOT NULL,\n\t[Quantity_Ordered] BIGINT NOT NULL,\n\t[Price_Each] FLOAT NOT NULL,\n\t[Sales] FLOAT NOT NULL,\n    [Order_Date] DATE NULL,\n    [Status] VARCHAR(20) NULL\n\n)\nWITH(\n    LOCATION = 'Sales_Transformed/factOrders',\n    DATA_SOURCE = SalesExSource,\n    FILE_FORMAT = SalesExfileF\n)\n\n\n\n\n\n\n\n\n\n",
 					"metadata": {
 						"language": "sql"
 					},
@@ -174,7 +174,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "9a6de002-001a-4e0a-9100-b7af2b588136"
+						"spark.autotune.trackingId": "c5fd1c17-99aa-4092-a9b6-fe9c71521619"
 					}
 				},
 				"metadata": {
@@ -223,7 +223,7 @@
 							"import pandas as pd"
 						],
 						"outputs": [],
-						"execution_count": 49
+						"execution_count": 59
 					},
 					{
 						"cell_type": "code",
@@ -243,7 +243,7 @@
 							"#sales_data.head(10)"
 						],
 						"outputs": [],
-						"execution_count": 50
+						"execution_count": 60
 					},
 					{
 						"cell_type": "code",
@@ -265,7 +265,7 @@
 							"sales_data.drop(un_columns,axis=1,inplace=True)"
 						],
 						"outputs": [],
-						"execution_count": 51
+						"execution_count": 61
 					},
 					{
 						"cell_type": "code",
@@ -296,7 +296,7 @@
 							"sales_data.info()"
 						],
 						"outputs": [],
-						"execution_count": 52
+						"execution_count": 62
 					},
 					{
 						"cell_type": "code",
@@ -325,7 +325,7 @@
 							"else ('Medium' if x >= 3000 and x < 6000 else 'Large'))"
 						],
 						"outputs": [],
-						"execution_count": 53
+						"execution_count": 63
 					},
 					{
 						"cell_type": "code",
@@ -341,9 +341,6 @@
 							}
 						},
 						"source": [
-							"#OrderDate dimention table\r\n",
-							"dimOrderDate = sales_data[['ORDERNUMBER','ORDERDATE','STATUS']].drop_duplicates().reset_index(drop=True)\r\n",
-							"\r\n",
 							"#Products dimention table\r\n",
 							"dimProducts = sales_data[['PRODUCTCODE','MSRP','PRODUCTLINE']].drop_duplicates().reset_index(drop=True)\r\n",
 							"\r\n",
@@ -356,10 +353,10 @@
 							"dimSalesDeals = sales_data[['SALES','DEALSIZE']].drop_duplicates().reset_index(drop=True) #transitive dependency\r\n",
 							"\r\n",
 							"#Orders fact table\r\n",
-							"factOrders = sales_data[['ORDERNUMBER','PRODUCTCODE','CUSTOMERNAME','QUANTITYORDERED', 'PRICEEACH', 'SALES']]"
+							"factOrders = sales_data[['ORDERNUMBER','PRODUCTCODE','CUSTOMERNAME','QUANTITYORDERED', 'PRICEEACH', 'SALES','ORDERDATE','STATUS']]"
 						],
 						"outputs": [],
-						"execution_count": 54
+						"execution_count": 64
 					},
 					{
 						"cell_type": "code",
@@ -382,7 +379,7 @@
 							""
 						],
 						"outputs": [],
-						"execution_count": 55
+						"execution_count": 65
 					}
 				]
 			},
@@ -431,7 +428,7 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "------------------------------------------------------------------------------------------------------------------------------------------------------------\nCREATE PROCEDURE Sales.loading_data_SCD1 AS\nBEGIN\n---Insert new records\nINSERT INTO Sales.dimCustomers\nSELECT *\nFROM Sales.ExCustomers as stg\nWHERE NOT EXISTS(\n    SELECT *\n    FROM Sales.dimCustomers AS dim WHERE dim.Customer_Name = stg.Customer_Name\n)\n\n\n---SCD Type 1\nUPDATE Sales.dimCustomers\nSET Phone = stg.Phone ,\n    Address_Line1 = stg.Address_Line1,\n    Address_Line2 = stg.Address_Line2,\n    City =  stg.City, \n    State =  stg.State, \n    Postal_Code =  stg.Postal_Code,\n    Country =  stg.Country, \n    Territory =  stg.Territory, \n    Contact_Lastname =  stg.Contact_Lastname,\n    Conact_Firstname =  stg.Conact_Firstname\nFROM Sales.dimCustomers AS dim INNER JOIN Sales.ExCustomers AS stg\nON dim.Customer_Name = stg.Customer_Name\nWHERE dim.Phone <> stg.Phone \nOR dim.Address_Line1 <> stg.Address_Line1 \nOR dim.Address_Line2 <> stg.Address_Line2\nOR dim.City <> stg.City \nOR dim.State <> stg.State \nOR dim.Postal_Code <> stg.Postal_Code\nOR dim.Country <> stg.Country \nOR dim.Territory <> stg.Territory \nOR dim.Contact_Lastname <> stg.Contact_Lastname\nOR dim.Conact_Firstname <> stg.Conact_Firstname\n\nALTER INDEX ALL ON  Sales.dimCustomers REBUILD\n\n------------------------------------------------------------------------------------------------------------------------------------------------------------\n\nINSERT INTO Sales.dimOrderDate\nSELECT *\nFROM Sales.ExOrderDate AS stg\nWHERE NOT EXISTS(\n    SELECT *\n    FROM Sales.dimOrderDate AS dim WHERE dim.Order_Number = stg.Order_Number \n)\n\n---SCD Type 1\nUPDATE Sales.dimOrderDate\nSET Order_Date = stg.Order_Date,\n    Status = stg.Status \nFROM Sales.dimOrderDate AS dim INNER JOIN Sales.ExOrderDate AS stg ON dim.Order_Number = stg.Order_Number \nWHERE dim.Order_Date <> stg.Order_Date OR dim.Status <> stg.Status \n\nALTER INDEX ALL ON Sales.dimOrderDate REBUILD\n\n------------------------------------------------------------------------------------------------------------------------------------------------------------\n\n\n\nINSERT INTO Sales.dimProducts\nSELECT *\nFROM Sales.ExProducts AS stg\nWHERE NOT EXISTS(\n    SELECT *\n    FROM Sales.dimProducts AS dim WHERE dim.Product_Code = stg.Product_Code\n)\n\n---SCD Type 1\nUPDATE Sales.dimProducts\nSET MSRP = stg.MSRP,\n    Product_Line = stg.Product_Line\nFROM Sales.dimProducts AS dim INNER JOIN Sales.ExProducts AS  stg ON dim.Product_Code = stg.Product_Code\nWHERE dim.MSRP <> stg.MSRP OR dim.Product_Line <> stg.Product_Line\n\nALTER INDEX ALL ON Sales.dimProducts REBUILD\n\n------------------------------------------------------------------------------------------------------------------------------------------------------------\n\n\nINSERT INTO Sales.dimSalesDeals\nSELECT *\nFROM Sales.ExSalesDeals AS stg\nWHERE NOT EXISTS(\n    SELECT *\n    FROM Sales.dimSalesDeals AS dim WHERE dim.Sales = stg.Sales\n)\n\n---SCD Type 1\nUPDATE Sales.dimSalesDeals\nSET Deal_Size = stg.Deal_Size\nFROM Sales.dimSalesDeals AS dim INNER JOIN Sales.ExSalesDeals AS stg ON dim.Sales = stg.Sales\nWHERE dim.Deal_Size <> stg.Deal_Size \n\nALTER INDEX ALL ON Sales.dimSalesDeals REBUILD\n\nEND\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+					"query": "------------------------------------------------------------------------------------------------------------------------------------------------------------\nCREATE PROCEDURE Sales.loading_data_SCD1 AS\nBEGIN\n---Insert new records\nINSERT INTO Sales.dimCustomers\nSELECT *\nFROM Sales.ExCustomers as stg\nWHERE NOT EXISTS(\n    SELECT *\n    FROM Sales.dimCustomers AS dim WHERE dim.Customer_Name = stg.Customer_Name\n)\n\n\n---SCD Type 1\nUPDATE Sales.dimCustomers\nSET Phone = stg.Phone ,\n    Address_Line1 = stg.Address_Line1,\n    Address_Line2 = stg.Address_Line2,\n    City =  stg.City, \n    State =  stg.State, \n    Postal_Code =  stg.Postal_Code,\n    Country =  stg.Country, \n    Territory =  stg.Territory, \n    Contact_Lastname =  stg.Contact_Lastname,\n    Conact_Firstname =  stg.Conact_Firstname\nFROM Sales.dimCustomers AS dim INNER JOIN Sales.ExCustomers AS stg\nON dim.Customer_Name = stg.Customer_Name\nWHERE dim.Phone <> stg.Phone \nOR dim.Address_Line1 <> stg.Address_Line1 \nOR dim.Address_Line2 <> stg.Address_Line2\nOR dim.City <> stg.City \nOR dim.State <> stg.State \nOR dim.Postal_Code <> stg.Postal_Code\nOR dim.Country <> stg.Country \nOR dim.Territory <> stg.Territory \nOR dim.Contact_Lastname <> stg.Contact_Lastname\nOR dim.Conact_Firstname <> stg.Conact_Firstname\n\nALTER INDEX ALL ON  Sales.dimCustomers REBUILD\n\n------------------------------------------------------------------------------------------------------------------------------------------------------------\n\nINSERT INTO Sales.dimOrderDate\nSELECT *\nFROM Sales.ExOrderDate AS stg\nWHERE NOT EXISTS(\n    SELECT *\n    FROM Sales.dimOrderDate AS dim WHERE dim.Order_Number = stg.Order_Number \n)\n\n---SCD Type 1\nUPDATE Sales.dimOrderDate\nSET Order_Date = stg.Order_Date,\n    Status = stg.Status \nFROM Sales.dimOrderDate AS dim INNER JOIN Sales.ExOrderDate AS stg ON dim.Order_Number = stg.Order_Number \nWHERE dim.Order_Date <> stg.Order_Date OR dim.Status <> stg.Status \n\nALTER INDEX ALL ON Sales.dimOrderDate REBUILD\n\n------------------------------------------------------------------------------------------------------------------------------------------------------------\n\n\n\nINSERT INTO Sales.dimProducts\nSELECT *\nFROM Sales.ExProducts AS stg\nWHERE NOT EXISTS(\n    SELECT *\n    FROM Sales.dimProducts AS dim WHERE dim.Product_Code = stg.Product_Code\n)\n\n---SCD Type 1\nUPDATE Sales.dimProducts\nSET MSRP = stg.MSRP,\n    Product_Line = stg.Product_Line\nFROM Sales.dimProducts AS dim INNER JOIN Sales.ExProducts AS  stg ON dim.Product_Code = stg.Product_Code\nWHERE dim.MSRP <> stg.MSRP OR dim.Product_Line <> stg.Product_Line\n\nALTER INDEX ALL ON Sales.dimProducts REBUILD\n\n------------------------------------------------------------------------------------------------------------------------------------------------------------\n\nINSERT INTO Sales.dimSalesDeals\nSELECT *\nFROM Sales.ExSalesDeals AS stg\nWHERE NOT EXISTS(\n    SELECT *\n    FROM Sales.dimSalesDeals AS dim WHERE dim.Sales = stg.Sales\n)\n\n---SCD Type 1\nUPDATE Sales.dimSalesDeals\nSET Deal_Size = stg.Deal_Size\nFROM Sales.dimSalesDeals AS dim INNER JOIN Sales.ExSalesDeals AS stg ON dim.Sales = stg.Sales\nWHERE dim.Deal_Size <> stg.Deal_Size \n\nALTER INDEX ALL ON Sales.dimSalesDeals REBUILD\n\n------------------------------------------------------------------------------------------------------------------------------------------------------------\n\n-- Insert data into Fact table\n\nINSERT INTO Sales.factOrders\nSELECT *\nFROM Sales.ExOrders as stg\nWHERE NOT EXISTS(\n    SELECT * FROM Sales.factOrders AS fact WHERE fact.Order_Number = stg.Order_Number\n)\n \nALTER INDEX ALL ON Sales.factOrders REBUILD\n\nEND\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
 					"metadata": {
 						"language": "sql"
 					},
@@ -506,32 +503,6 @@
 						"typeProperties": {
 							"storedProcedureName": "[Sales].[loading_data_SCD1]"
 						}
-					},
-					{
-						"name": "Script1",
-						"type": "Script",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"linkedServiceName": {
-							"referenceName": "spw-cg-casestudy-WorkspaceDefaultSqlServer",
-							"type": "LinkedServiceReference",
-							"parameters": {}
-						},
-						"typeProperties": {
-							"scripts": [
-								{
-									"type": "Query"
-								}
-							],
-							"scriptBlockExecutionTimeout": "02:00:00"
-						}
 					}
 				],
 				"policy": {
@@ -542,8 +513,7 @@
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/notebooks/data_transformation')]",
 				"[concat(variables('workspaceId'), '/bigDataPools/salespycg')]",
-				"[concat(variables('workspaceId'), '/sqlPools/sales_cg')]",
-				"[concat(variables('workspaceId'), '/linkedServices/spw-cg-casestudy-WorkspaceDefaultSqlServer')]"
+				"[concat(variables('workspaceId'), '/sqlPools/sales_cg')]"
 			]
 		}
 	]
