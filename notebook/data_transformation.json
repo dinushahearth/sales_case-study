@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "5785ccb8-d38c-4f03-a65f-84f693b60c73"
+				"spark.autotune.trackingId": "3e95bed5-0c01-4096-a07f-0604dde5f9f9"
 			}
 		},
 		"metadata": {
@@ -179,9 +179,6 @@
 					}
 				},
 				"source": [
-					"#OrderDate dimention table\r\n",
-					"dimOrderDate = sales_data[['ORDERNUMBER','ORDERDATE','STATUS']].drop_duplicates().reset_index(drop=True)\r\n",
-					"\r\n",
 					"#Products dimention table\r\n",
 					"dimProducts = sales_data[['PRODUCTCODE','MSRP','PRODUCTLINE']].drop_duplicates().reset_index(drop=True)\r\n",
 					"\r\n",
